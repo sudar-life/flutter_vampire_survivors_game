@@ -1,16 +1,8 @@
-# vampire_survivors_game
+# 뱀파이어 서바이벌 게임 프로젝트
 
-A new Flutter project.
+플러터로 게임개발 프로젝트
+며칠이 걸릴지, 프로젝트를 완성할 수 있을지 모르겠지만 개인적인 미니 프로젝트를 시작합니다.
 
-## Getting Started
+플러터의 flame이라는 게임 엔진이 있는 것은 알지만 1부터 10까지 모두 직접 개발해보고자 합니다.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 기획
