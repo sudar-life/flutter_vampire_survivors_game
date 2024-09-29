@@ -5,4 +5,11 @@
 
 플러터의 flame이라는 게임 엔진이 있는 것은 알지만 1부터 10까지 모두 직접 개발해보고자 합니다.
 
-## 기획
+### 리서치 한 게임
+
+- 뱀파이어 서바이벌 게임
+- BROTATO 게임
+
+### 간단 게임 시안
+
+![image](https://github.com/user-attachments/assets/e04550c5-381e-4daa-895c-9998fb5b4599)
