@@ -3,7 +3,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vampire_survivors_game/src/components/background_board.dart';
 import 'package:vampire_survivors_game/src/components/background_decoration.dart';
+import 'package:vampire_survivors_game/src/components/enemy.dart';
+import 'package:vampire_survivors_game/src/components/gui.dart';
+import 'package:vampire_survivors_game/src/components/player.dart';
+import 'package:vampire_survivors_game/src/cubit/backboard_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/enemy_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/key_event_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/player_movement_manager.dart';
+import 'package:vampire_survivors_game/src/enum/game_type.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -13,192 +24,137 @@ class GameBoard extends StatefulWidget {
 }
 
 class _GameBoardState extends State<GameBoard> {
-  double gameZoneWidth = 0;
-  double gameZoneHeight = 0;
-
-  double backgroundMoveX = 0;
-  double backgroundMoveY = 0;
-
-  double playerMoveX = 0;
-  double playerMoveY = 0;
-
-  double directionX = 0;
-  double directionY = 0;
-
-  //캐릭터 이동 속도
+  late KeyEventManagerCubit keyManager;
   double speed = 6;
-  // 현재 눌려있는 키들을 관리하는 Set
-  Set<LogicalKeyboardKey> pressedKeys = {};
 
   @override
   void initState() {
     super.initState();
-    Timer.periodic(const Duration(milliseconds: 10), (timer) {
-      _moveBackground();
-      _movePlayer();
-      update();
+
+    Timer.periodic(const Duration(milliseconds: 33), (timer) {
+      if (context.read<GameManager>().state.gameType == GameType.start ||
+          context.read<GameManager>().state.gameType == GameType.resume) {
+        _moveBackground();
+        _movePlayer();
+        _moveEnemy();
+        _updateDirection();
+      }
     });
   }
 
-  void update() => setState(() {});
-
   void _moveBackground() {
-    if (backgroundMoveX > gameZoneWidth / 2 * 1.5) {
-      backgroundMoveX = gameZoneWidth / 2 * 1.5;
-    }
-    if (backgroundMoveX < -gameZoneWidth / 2 * 1.5) {
-      backgroundMoveX = -gameZoneWidth / 2 * 1.5;
-    }
-
-    if (backgroundMoveY > gameZoneHeight / 2 * 1.5) {
-      backgroundMoveY = gameZoneHeight / 2 * 1.5;
-    }
-    if (backgroundMoveY < -gameZoneHeight / 2 * 1.5) {
-      backgroundMoveY = -gameZoneHeight / 2 * 1.5;
-    }
-    if (playerMoveX > gameZoneWidth / 2 * 1.5 ||
-        playerMoveX < -gameZoneWidth / 2 * 1.5) {
-      if (playerMoveY > gameZoneHeight / 2 * 1.5 ||
-          playerMoveY < -gameZoneHeight / 2 * 1.5) {
-        return;
-      } else {
-        backgroundMoveY -= directionY * speed;
-      }
-      return;
-    }
-    if (playerMoveY > gameZoneHeight / 2 * 1.5 ||
-        playerMoveY < -gameZoneHeight / 2 * 1.5) {
-      if (playerMoveX > gameZoneWidth / 2 * 1.5 ||
-          playerMoveX < -gameZoneWidth / 2 * 1.5) {
-        return;
-      } else {
-        backgroundMoveX -= directionX * speed;
-      }
-      return;
-    }
-    backgroundMoveX -= directionX * speed;
-    backgroundMoveY -= directionY * speed;
+    context.read<BackboardManager>().moveBackground(
+          directionX: context.read<PlayerMovementManager>().state.directionX,
+          directionY: context.read<PlayerMovementManager>().state.directionY,
+          playerMoveX: context.read<PlayerMovementManager>().state.playerMoveX,
+          playerMoveY: context.read<PlayerMovementManager>().state.playerMoveY,
+          speed: speed,
+        );
   }
 
   void _movePlayer() {
-    playerMoveX -= directionX * speed;
-    playerMoveY -= directionY * speed;
-
-    if (playerMoveX - 15 <= gameZoneWidth * -1) {
-      playerMoveX = gameZoneWidth * -1 + 15;
-    }
-    if (playerMoveX + 15 >= gameZoneWidth) {
-      playerMoveX = gameZoneWidth - 15;
-    }
-    if (playerMoveY - 15 <= gameZoneHeight * -1) {
-      playerMoveY = gameZoneHeight * -1 + 15;
-    }
-    if (playerMoveY + 15 >= gameZoneHeight) {
-      playerMoveY = gameZoneHeight - 15;
-    }
+    var gameZoneWidth = context.read<BackboardManager>().state.gameZoneWidth;
+    var gameZoneHeight = context.read<BackboardManager>().state.gameZoneHeight;
+    context
+        .read<PlayerMovementManager>()
+        .movePlayer(speed, gameZoneWidth, gameZoneHeight);
   }
 
-  void moveLogic(bool isDown, LogicalKeyboardKey key) {
-    switch (key) {
-      case LogicalKeyboardKey.arrowUp:
-        directionY = isDown ? 1 : 0;
-        break;
-      case LogicalKeyboardKey.arrowDown:
-        directionY = isDown ? -1 : 0;
-        break;
-      case LogicalKeyboardKey.arrowLeft:
-        directionX = isDown ? 1 : 0;
-        break;
-      case LogicalKeyboardKey.arrowRight:
-        directionX = isDown ? -1 : 0;
-        break;
-    }
+  void _moveEnemy() {
+    var playerX = context.read<PlayerMovementManager>().state.playerMoveX;
+    var playerY = context.read<PlayerMovementManager>().state.playerMoveY;
+    context.read<EnemyManager>().moveEnemy(speed, playerX, playerY);
   }
 
   void _updateDirection() {
-    directionX = 0;
-    directionY = 0;
+    context.read<PlayerMovementManager>().initDirection();
 
-    if (pressedKeys.contains(LogicalKeyboardKey.arrowUp)) {
-      directionY += 1;
+    if (keyManager.state.pressedKeys.contains(LogicalKeyboardKey.arrowUp)) {
+      context.read<PlayerMovementManager>().updateDirection(directionY: 1);
     }
-    if (pressedKeys.contains(LogicalKeyboardKey.arrowDown)) {
-      directionY -= 1;
+    if (keyManager.state.pressedKeys.contains(LogicalKeyboardKey.arrowDown)) {
+      context.read<PlayerMovementManager>().updateDirection(directionY: -1);
     }
-    if (pressedKeys.contains(LogicalKeyboardKey.arrowLeft)) {
-      directionX += 1;
+    if (keyManager.state.pressedKeys.contains(LogicalKeyboardKey.arrowLeft)) {
+      context.read<PlayerMovementManager>().updateDirection(directionX: 1);
     }
-    if (pressedKeys.contains(LogicalKeyboardKey.arrowRight)) {
-      directionX -= 1;
+    if (keyManager.state.pressedKeys.contains(LogicalKeyboardKey.arrowRight)) {
+      context.read<PlayerMovementManager>().updateDirection(directionX: -1);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constrant) {
-      gameZoneWidth = constrant.maxWidth;
-      gameZoneHeight = constrant.maxHeight;
-      var backgroundWidth = gameZoneWidth * 2;
-      var backgroundHeight = gameZoneHeight * 2;
-      return Material(
-        color: const Color.fromARGB(255, 77, 77, 77),
-        child: SafeArea(
-          child: Focus(
-            autofocus: true,
-            onKeyEvent: (node, event) {
-              if (event is KeyDownEvent || event is KeyRepeatEvent) {
-                pressedKeys.add(event.logicalKey);
-              } else if (event is KeyUpEvent) {
-                pressedKeys.remove(event.logicalKey);
-              }
-              _updateDirection();
-              return KeyEventResult.handled;
-            },
-            child: Stack(
-              children: [
-                Positioned(
-                  left: -gameZoneWidth / 2 + backgroundMoveX * -1,
-                  top: -gameZoneHeight / 2 + backgroundMoveY * -1,
-                  child: ScaleTransition(
-                    scale: AlwaysStoppedAnimation(1),
-                    child: Container(
-                      width: backgroundWidth,
-                      height: backgroundHeight,
-                      color: Color(0xffB1C989),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            left: 0,
-                            right: 0,
-                            top: 0,
-                            bottom: 0,
-                            child: BackgroundDecoration(
-                              areaWidth: backgroundWidth,
-                              areaHeight: backgroundHeight,
-                            ),
-                          ),
-                          Positioned(
-                            left: backgroundWidth / 2 - 15 + playerMoveX,
-                            top: backgroundHeight / 2 - 15 + playerMoveY,
-                            child: Container(
-                              width: 30,
-                              height: 30,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.black,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
+    keyManager = context.read<KeyEventManagerCubit>();
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<GameManager, GameState>(
+          listener: (context, state) {
+            switch (state.gameType) {
+              case GameType.start:
+                var width =
+                    context.read<BackboardManager>().state.gameZoneWidth * 2;
+                var height =
+                    context.read<BackboardManager>().state.gameZoneHeight * 2;
+                context.read<EnemyManager>().create(width, height);
+                break;
+              case GameType.pause:
+                break;
+              case GameType.resume:
+                break;
+              case GameType.end:
+                break;
+              case GameType.idle:
+                break;
+            }
+          },
+        ),
+      ],
+      child: LayoutBuilder(builder: (context, constrant) {
+        context
+            .read<BackboardManager>()
+            .updateGameZoneSize(constrant.maxWidth, constrant.maxHeight);
+        var backgroundWidth = constrant.maxWidth * 2;
+        var backgroundHeight = constrant.maxHeight * 2;
+        return Material(
+          color: const Color.fromARGB(255, 77, 77, 77),
+          child: SafeArea(
+            child: Focus(
+              autofocus: true,
+              onKeyEvent: (node, event) {
+                if (event.logicalKey == LogicalKeyboardKey.escape) {
+                  context.read<GameManager>().gamePause();
+                }
+                if (event is KeyDownEvent || event is KeyRepeatEvent) {
+                  keyManager.addKey(event.logicalKey);
+                } else if (event is KeyUpEvent) {
+                  keyManager.removeKey(event.logicalKey);
+                }
+                return KeyEventResult.handled;
+              },
+              child: BackgroundBoard(
+                backgroundWidth: backgroundWidth,
+                backgroundHeight: backgroundHeight,
+                gui: const Gui(),
+                children: [
+                  BackgroundDecoration(
+                    areaWidth: backgroundWidth,
+                    areaHeight: backgroundHeight,
                   ),
-                )
-              ],
+                  Player(
+                    backgroundHeight: backgroundHeight,
+                    backgroundWidth: backgroundWidth,
+                  ),
+                  Enemy(
+                    backgroundHeight: backgroundHeight,
+                    backgroundWidth: backgroundWidth,
+                  )
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    });
+        );
+      }),
+    );
   }
 }

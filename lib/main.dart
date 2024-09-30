@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vampire_survivors_game/src/cubit/backboard_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/enemy_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/key_event_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/player_movement_manager.dart';
 import 'package:vampire_survivors_game/src/game_board.dart';
 
 void main() {
@@ -17,7 +23,16 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const GameBoard(),
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (context) => GameManager()),
+          BlocProvider(create: (context) => PlayerMovementManager()),
+          BlocProvider(create: (context) => BackboardManager()),
+          BlocProvider(create: (context) => KeyEventManagerCubit()),
+          BlocProvider(create: (context) => EnemyManager()),
+        ],
+        child: const GameBoard(),
+      ),
     );
   }
 }
