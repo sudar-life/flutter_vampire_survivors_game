@@ -8,11 +8,13 @@ import 'package:vampire_survivors_game/src/components/background_board.dart';
 import 'package:vampire_survivors_game/src/components/background_decoration.dart';
 import 'package:vampire_survivors_game/src/components/enemy.dart';
 import 'package:vampire_survivors_game/src/components/gui.dart';
+import 'package:vampire_survivors_game/src/components/missile.dart';
 import 'package:vampire_survivors_game/src/components/player.dart';
 import 'package:vampire_survivors_game/src/cubit/backboard_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/enemy_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/key_event_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/missile_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/player_movement_manager.dart';
 import 'package:vampire_survivors_game/src/enum/game_type.dart';
 
@@ -37,6 +39,7 @@ class _GameBoardState extends State<GameBoard> {
         _moveBackground();
         _movePlayer();
         _moveEnemy();
+        _moveMissile();
         _updateDirection();
       }
     });
@@ -63,7 +66,11 @@ class _GameBoardState extends State<GameBoard> {
   void _moveEnemy() {
     var playerX = context.read<PlayerMovementManager>().state.playerMoveX;
     var playerY = context.read<PlayerMovementManager>().state.playerMoveY;
-    context.read<EnemyManager>().moveEnemy(speed, playerX, playerY);
+    context.read<EnemyManager>().moveEnemy(playerX, playerY);
+  }
+
+  void _moveMissile() {
+    context.read<MissileManager>().moveMissile();
   }
 
   void _updateDirection() {
@@ -96,7 +103,7 @@ class _GameBoardState extends State<GameBoard> {
                     context.read<BackboardManager>().state.gameZoneWidth * 2;
                 var height =
                     context.read<BackboardManager>().state.gameZoneHeight * 2;
-                context.read<EnemyManager>().create(width, height);
+                context.read<EnemyManager>().create(width, height, 3);
                 break;
               case GameType.pause:
                 break;
@@ -122,6 +129,16 @@ class _GameBoardState extends State<GameBoard> {
             child: Focus(
               autofocus: true,
               onKeyEvent: (node, event) {
+                if (event.logicalKey == LogicalKeyboardKey.space &&
+                    event is KeyDownEvent) {
+                  context.read<MissileManager>().shotMissile(
+                      backgroundWidth,
+                      backgroundHeight,
+                      context.read<PlayerMovementManager>().state.playerMoveX,
+                      context.read<PlayerMovementManager>().state.playerMoveY,
+                      context.read<EnemyManager>().state.enemies.first.tx,
+                      context.read<EnemyManager>().state.enemies.first.ty);
+                }
                 if (event.logicalKey == LogicalKeyboardKey.escape) {
                   context.read<GameManager>().gamePause();
                 }
@@ -145,10 +162,29 @@ class _GameBoardState extends State<GameBoard> {
                     backgroundHeight: backgroundHeight,
                     backgroundWidth: backgroundWidth,
                   ),
-                  Enemy(
-                    backgroundHeight: backgroundHeight,
-                    backgroundWidth: backgroundWidth,
-                  )
+                  BlocBuilder<MissileManager, MissileState>(
+                      builder: (context, state) {
+                    return Stack(
+                      children: state.missiles
+                          .where((element) => element != null)
+                          .map((missile) => Missile(
+                                x: missile!.x,
+                                y: missile.y,
+                              ))
+                          .toList(),
+                    );
+                  }),
+                  BlocBuilder<EnemyManager, EnemyState>(
+                      builder: (context, state) {
+                    return Stack(
+                      children: state.enemies
+                          .map((enemy) => Enemy(
+                                x: enemy.tx,
+                                y: enemy.ty,
+                              ))
+                          .toList(),
+                    );
+                  }),
                 ],
               ),
             ),
