@@ -17,6 +17,7 @@ import 'package:vampire_survivors_game/src/cubit/key_event_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/missile_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/player_movement_manager.dart';
 import 'package:vampire_survivors_game/src/enum/game_type.dart';
+import 'package:vampire_survivors_game/src/enum/gun_sector_type.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -132,12 +133,14 @@ class _GameBoardState extends State<GameBoard> {
                 if (event.logicalKey == LogicalKeyboardKey.space &&
                     event is KeyDownEvent) {
                   context.read<MissileManager>().shotMissile(
-                      backgroundWidth,
-                      backgroundHeight,
-                      context.read<PlayerMovementManager>().state.playerMoveX,
-                      context.read<PlayerMovementManager>().state.playerMoveY,
-                      context.read<EnemyManager>().state.enemies.first.tx,
-                      context.read<EnemyManager>().state.enemies.first.ty);
+                        backgroundWidth,
+                        backgroundHeight,
+                        context.read<PlayerMovementManager>().state.playerMoveX,
+                        context.read<PlayerMovementManager>().state.playerMoveY,
+                        context.read<EnemyManager>().state.enemies.first.tx,
+                        context.read<EnemyManager>().state.enemies.first.ty,
+                        GunSectorType.TOP,
+                      );
                 }
                 if (event.logicalKey == LogicalKeyboardKey.escape) {
                   context.read<GameManager>().gamePause();
