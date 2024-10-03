@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:equatable/equatable.dart';
 
 class EnemyModel extends Equatable {
@@ -7,8 +9,10 @@ class EnemyModel extends Equatable {
   final double y;
   final double speed;
   final int hp;
-  final int power;
+  final double power;
+  final double? knockbackPower;
   final int defense;
+  final bool isHit;
 
   const EnemyModel({
     this.areaWidth = 0.0,
@@ -17,8 +21,10 @@ class EnemyModel extends Equatable {
     this.y = 0.0,
     this.speed = 3,
     this.hp = 10,
-    this.power = 1,
+    this.power = 0.5,
     this.defense = 1,
+    this.knockbackPower,
+    this.isHit = false,
   });
 
   double get tx => areaWidth / 2 - 15 + x;
@@ -31,8 +37,10 @@ class EnemyModel extends Equatable {
     double? y,
     double? speed,
     int? hp,
-    int? power,
+    double? power,
+    double? knockbackPower,
     int? defense,
+    bool? isHit,
   }) {
     return EnemyModel(
       areaWidth: areaWidth ?? this.areaWidth,
@@ -43,6 +51,8 @@ class EnemyModel extends Equatable {
       hp: hp ?? this.hp,
       power: power ?? this.power,
       defense: defense ?? this.defense,
+      knockbackPower: knockbackPower ?? this.knockbackPower,
+      isHit: isHit ?? this.isHit,
     );
   }
 
@@ -56,5 +66,7 @@ class EnemyModel extends Equatable {
         hp,
         power,
         defense,
+        knockbackPower,
+        isHit,
       ];
 }

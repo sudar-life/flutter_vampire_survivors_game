@@ -1,9 +1,12 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vampire_survivors_game/src/enum/gun_sector_type.dart';
+import 'package:vampire_survivors_game/src/model/enemy_model.dart';
 import 'package:vampire_survivors_game/src/model/missile_model.dart';
+import 'package:vampire_survivors_game/src/utils/data_util.dart';
 
 class MissileManager extends Cubit<MissileState> {
   double? width;
@@ -29,7 +32,7 @@ class MissileManager extends Cubit<MissileState> {
       y: y,
       angle: atan2(((ty + 15) - y), ((tx + 15) - x)),
       speed: speed,
-      power: 1,
+      power: 10,
     );
     emit(state.copyWith(missiles: [...state.missiles, missile]));
   }
@@ -45,6 +48,28 @@ class MissileManager extends Cubit<MissileState> {
       final double currentX = x + missile.speed * cos(missile.angle);
       final double currentY = y + missile.speed * sin(missile.angle);
       return missile.copyWith(x: currentX, y: currentY);
+    });
+    emit(state.copyWith(missiles: [...newMissiles]));
+  }
+
+  checkColliding(List<EnemyModel> enemies) {
+    var newMissiles =
+        state.missiles.where((element) => element != null).toList();
+    var newEnemies = enemies;
+    newMissiles.removeWhere((missile) {
+      if (missile == null) return false;
+      var x = missile.x;
+      var y = missile.y;
+      var radius = 5.0;
+      var isHit = newEnemies.any((enemy) {
+        var centerA = Offset(x, y);
+        var centerB = Offset(enemy.tx + 15, enemy.ty + 15);
+        var radiusA = radius;
+        var radiusB = 15.0;
+        return GameDataUtil.isCircleColliding(
+            centerA, radiusA, centerB, radiusB);
+      });
+      return isHit;
     });
     emit(state.copyWith(missiles: [...newMissiles]));
   }

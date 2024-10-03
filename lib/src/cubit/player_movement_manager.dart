@@ -1,5 +1,9 @@
+import 'dart:ui';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:vampire_survivors_game/src/model/enemy_model.dart';
+import 'package:vampire_survivors_game/src/utils/data_util.dart';
 
 class PlayerMovementManager extends Cubit<PlayerMoveMentState> {
   PlayerMovementManager() : super(const PlayerMoveMentState());
@@ -34,6 +38,20 @@ class PlayerMovementManager extends Cubit<PlayerMoveMentState> {
       emit(state.copyWith(playerMoveY: gameZoneHeight - 15));
     }
   }
+
+  checkColliding(List<EnemyModel> enemies) {
+    var playerX = state.playerMoveX;
+    var playerY = state.playerMoveY;
+    var isHit = enemies.any((enemy) {
+      var centerA = Offset(playerX, playerY);
+      var centerB = Offset(enemy.x + 15, enemy.y + 15);
+      var radiusA = 15.0;
+      var radiusB = 15.0;
+      return GameDataUtil.isCircleColliding(centerA, radiusA, centerB, radiusB);
+    });
+    print(isHit);
+    emit(state.copyWith(isHit: isHit));
+  }
 }
 
 class PlayerMoveMentState extends Equatable {
@@ -41,12 +59,14 @@ class PlayerMoveMentState extends Equatable {
   final double directionY;
   final double playerMoveX;
   final double playerMoveY;
+  final bool isHit;
 
   const PlayerMoveMentState({
     this.directionX = 0.0,
     this.directionY = 0.0,
     this.playerMoveX = 0.0,
     this.playerMoveY = 0.0,
+    this.isHit = false,
   });
 
   PlayerMoveMentState copyWith({
@@ -54,12 +74,14 @@ class PlayerMoveMentState extends Equatable {
     double? directionY,
     double? playerMoveX,
     double? playerMoveY,
+    bool? isHit,
   }) {
     return PlayerMoveMentState(
       directionX: directionX ?? this.directionX,
       directionY: directionY ?? this.directionY,
       playerMoveX: playerMoveX ?? this.playerMoveX,
       playerMoveY: playerMoveY ?? this.playerMoveY,
+      isHit: isHit ?? this.isHit,
     );
   }
 
@@ -69,5 +91,6 @@ class PlayerMoveMentState extends Equatable {
         directionY,
         playerMoveX,
         playerMoveY,
+        isHit,
       ];
 }

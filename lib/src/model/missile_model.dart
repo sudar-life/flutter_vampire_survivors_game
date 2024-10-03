@@ -5,7 +5,7 @@ class MissileModel extends Equatable {
   final double y;
   final double angle;
   final double speed;
-  final int power;
+  final double power;
 
   const MissileModel({
     this.x = 0.0,
@@ -20,7 +20,7 @@ class MissileModel extends Equatable {
     double? y,
     double? angle,
     double? speed,
-    int? power,
+    double? power,
   }) {
     return MissileModel(
       x: (x ?? this.x),

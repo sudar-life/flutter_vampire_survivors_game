@@ -37,13 +37,31 @@ class _GameBoardState extends State<GameBoard> {
     Timer.periodic(const Duration(milliseconds: 33), (timer) {
       if (context.read<GameManager>().state.gameType == GameType.start ||
           context.read<GameManager>().state.gameType == GameType.resume) {
-        _moveBackground();
-        _movePlayer();
-        _moveEnemy();
-        _moveMissile();
-        _updateDirection();
+        _updateGame();
       }
     });
+  }
+
+  void _updateGame() {
+    _moveBackground();
+    _movePlayer();
+    _moveEnemy();
+    _moveMissile();
+    _handleCollision();
+    _updateDirection();
+  }
+
+  void _handleCollision() {
+    //미사일 충돌감지
+    context
+        .read<EnemyManager>()
+        .checkDamage(context.read<MissileManager>().state.missiles);
+    //적군 미사일 충돌감지
+    var enemies = context.read<EnemyManager>().state.enemies;
+    context.read<MissileManager>().checkColliding(enemies);
+
+    //플레이어 충돌 감지
+    context.read<PlayerMovementManager>().checkColliding(enemies);
   }
 
   void _moveBackground() {
@@ -184,6 +202,7 @@ class _GameBoardState extends State<GameBoard> {
                           .map((enemy) => Enemy(
                                 x: enemy.tx,
                                 y: enemy.ty,
+                                isHit: enemy.isHit,
                               ))
                           .toList(),
                     );

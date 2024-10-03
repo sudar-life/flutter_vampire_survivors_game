@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 class Enemy extends StatelessWidget {
   final double x;
   final double y;
-  const Enemy({super.key, required this.x, required this.y});
+  final bool isHit;
+  const Enemy(
+      {super.key, required this.x, required this.y, required this.isHit});
 
   @override
   Widget build(BuildContext context) {
@@ -13,9 +15,9 @@ class Enemy extends StatelessWidget {
       child: Container(
         width: 30,
         height: 30,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.red,
+          color: isHit ? Colors.white : Colors.red,
         ),
       ),
     );
