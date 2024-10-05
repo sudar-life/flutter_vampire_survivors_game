@@ -15,7 +15,7 @@ import 'package:vampire_survivors_game/src/cubit/enemy_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/key_event_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/missile_manager.dart';
-import 'package:vampire_survivors_game/src/cubit/player_movement_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/player_manager.dart';
 import 'package:vampire_survivors_game/src/enum/game_type.dart';
 import 'package:vampire_survivors_game/src/enum/gun_sector_type.dart';
 
@@ -34,7 +34,7 @@ class _GameBoardState extends State<GameBoard> {
   void initState() {
     super.initState();
 
-    Timer.periodic(const Duration(milliseconds: 33), (timer) {
+    Timer.periodic(const Duration(milliseconds: 30), (timer) {
       if (context.read<GameManager>().state.gameType == GameType.start ||
           context.read<GameManager>().state.gameType == GameType.resume) {
         _updateGame();
@@ -49,6 +49,29 @@ class _GameBoardState extends State<GameBoard> {
     _moveMissile();
     _handleCollision();
     _updateDirection();
+    _shotMissile();
+  }
+
+  void _shotMissile() {
+    var playerState = context.read<PlayerManager>().state;
+    if (playerState.isShotPossible) {
+      var lastShotMissileTime = playerState.lastMissileShotTime;
+      if ((lastShotMissileTime == null ||
+              DateTime.now().difference(lastShotMissileTime).inMilliseconds >
+                  playerState.playerModel.attackSpeed) &&
+          playerState.targetEnemyPosition != null) {
+        context.read<MissileManager>().shotMissile(
+              context.read<BackboardManager>().state.gameZoneWidth * 2,
+              context.read<BackboardManager>().state.gameZoneHeight * 2,
+              playerState.playerMoveX,
+              playerState.playerMoveY,
+              playerState.targetEnemyPosition!.dx,
+              playerState.targetEnemyPosition!.dy,
+              GunSectorType.TOP,
+            );
+        context.read<PlayerManager>().updatedShotMissileTime();
+      }
+    }
   }
 
   void _handleCollision() {
@@ -61,15 +84,15 @@ class _GameBoardState extends State<GameBoard> {
     context.read<MissileManager>().checkColliding(enemies);
 
     //플레이어 충돌 감지
-    context.read<PlayerMovementManager>().checkColliding(enemies);
+    context.read<PlayerManager>().checkColliding(enemies);
   }
 
   void _moveBackground() {
     context.read<BackboardManager>().moveBackground(
-          directionX: context.read<PlayerMovementManager>().state.directionX,
-          directionY: context.read<PlayerMovementManager>().state.directionY,
-          playerMoveX: context.read<PlayerMovementManager>().state.playerMoveX,
-          playerMoveY: context.read<PlayerMovementManager>().state.playerMoveY,
+          directionX: context.read<PlayerManager>().state.directionX,
+          directionY: context.read<PlayerManager>().state.directionY,
+          playerMoveX: context.read<PlayerManager>().state.playerMoveX,
+          playerMoveY: context.read<PlayerManager>().state.playerMoveY,
           speed: speed,
         );
   }
@@ -78,13 +101,13 @@ class _GameBoardState extends State<GameBoard> {
     var gameZoneWidth = context.read<BackboardManager>().state.gameZoneWidth;
     var gameZoneHeight = context.read<BackboardManager>().state.gameZoneHeight;
     context
-        .read<PlayerMovementManager>()
+        .read<PlayerManager>()
         .movePlayer(speed, gameZoneWidth, gameZoneHeight);
   }
 
   void _moveEnemy() {
-    var playerX = context.read<PlayerMovementManager>().state.playerMoveX;
-    var playerY = context.read<PlayerMovementManager>().state.playerMoveY;
+    var playerX = context.read<PlayerManager>().state.playerMoveX;
+    var playerY = context.read<PlayerManager>().state.playerMoveY;
     context.read<EnemyManager>().moveEnemy(playerX, playerY);
   }
 
@@ -93,19 +116,19 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void _updateDirection() {
-    context.read<PlayerMovementManager>().initDirection();
+    context.read<PlayerManager>().initDirection();
 
     if (keyManager.state.pressedKeys.contains(LogicalKeyboardKey.arrowUp)) {
-      context.read<PlayerMovementManager>().updateDirection(directionY: 1);
+      context.read<PlayerManager>().updateDirection(directionY: 1);
     }
     if (keyManager.state.pressedKeys.contains(LogicalKeyboardKey.arrowDown)) {
-      context.read<PlayerMovementManager>().updateDirection(directionY: -1);
+      context.read<PlayerManager>().updateDirection(directionY: -1);
     }
     if (keyManager.state.pressedKeys.contains(LogicalKeyboardKey.arrowLeft)) {
-      context.read<PlayerMovementManager>().updateDirection(directionX: 1);
+      context.read<PlayerManager>().updateDirection(directionX: 1);
     }
     if (keyManager.state.pressedKeys.contains(LogicalKeyboardKey.arrowRight)) {
-      context.read<PlayerMovementManager>().updateDirection(directionX: -1);
+      context.read<PlayerManager>().updateDirection(directionX: -1);
     }
   }
 
@@ -151,10 +174,12 @@ class _GameBoardState extends State<GameBoard> {
                 if (event.logicalKey == LogicalKeyboardKey.space &&
                     event is KeyDownEvent) {
                   context.read<MissileManager>().shotMissile(
-                        backgroundWidth,
-                        backgroundHeight,
-                        context.read<PlayerMovementManager>().state.playerMoveX,
-                        context.read<PlayerMovementManager>().state.playerMoveY,
+                        context.read<BackboardManager>().state.gameZoneWidth *
+                            2,
+                        context.read<BackboardManager>().state.gameZoneHeight *
+                            2,
+                        context.read<PlayerManager>().state.playerMoveX,
+                        context.read<PlayerManager>().state.playerMoveY,
                         context.read<EnemyManager>().state.enemies.first.tx,
                         context.read<EnemyManager>().state.enemies.first.ty,
                         GunSectorType.TOP,

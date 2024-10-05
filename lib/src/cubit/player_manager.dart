@@ -3,10 +3,11 @@ import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:vampire_survivors_game/src/model/enemy_model.dart';
+import 'package:vampire_survivors_game/src/model/player_model.dart';
 import 'package:vampire_survivors_game/src/utils/data_util.dart';
 
-class PlayerMovementManager extends Cubit<PlayerMoveMentState> {
-  PlayerMovementManager() : super(const PlayerMoveMentState());
+class PlayerManager extends Cubit<PlayerState> {
+  PlayerManager() : super(const PlayerState());
 
   initDirection() {
     emit(state.copyWith(directionX: 0.0, directionY: 0.0));
@@ -43,45 +44,87 @@ class PlayerMovementManager extends Cubit<PlayerMoveMentState> {
     var playerX = state.playerMoveX;
     var playerY = state.playerMoveY;
     var isHit = enemies.any((enemy) {
-      var centerA = Offset(playerX, playerY);
+      var centerA = Offset(playerX + 20, playerY + 20);
       var centerB = Offset(enemy.x + 15, enemy.y + 15);
-      var radiusA = 15.0;
+      var radiusA = 20.0;
       var radiusB = 15.0;
       return GameDataUtil.isCircleColliding(centerA, radiusA, centerB, radiusB);
     });
-    print(isHit);
-    emit(state.copyWith(isHit: isHit));
+    Offset? targetEnemyPosition;
+    var isShotPossible = enemies.any((enemy) {
+      var centerA = Offset(playerX + 20, playerY + 20);
+      var centerB = Offset(enemy.x + 15, enemy.y + 15);
+      var radiusA = state.playerModel.attackBoundaryRadius;
+      var radiusB = 15.0;
+      var isPossibleShot =
+          GameDataUtil.isCircleColliding(centerA, radiusA, centerB, radiusB);
+      if (isPossibleShot) {
+        targetEnemyPosition = Offset(enemy.tx + 15, enemy.ty + 15);
+        ;
+      }
+      return isPossibleShot;
+    });
+    emit(state.copyWith(
+      isHit: isHit,
+      isShotPossible: isShotPossible,
+      targetEnemyPosition: targetEnemyPosition,
+    ));
+  }
+
+  updatedShotMissileTime() {
+    emit(state.copyWith(lastMissileShotTime: DateTime.now()));
   }
 }
 
-class PlayerMoveMentState extends Equatable {
+class PlayerState extends Equatable {
   final double directionX;
   final double directionY;
   final double playerMoveX;
   final double playerMoveY;
   final bool isHit;
+  final bool isShotPossible;
+  final PlayerModel playerModel;
+  final DateTime? lastMissileShotTime;
+  final Offset? targetEnemyPosition;
 
-  const PlayerMoveMentState({
+  const PlayerState({
     this.directionX = 0.0,
     this.directionY = 0.0,
     this.playerMoveX = 0.0,
     this.playerMoveY = 0.0,
+    this.playerModel = const PlayerModel(
+      hp: 100,
+      attackSpeed: 1000,
+      moveSpeed: 1,
+      attackBoundaryRadius: 150,
+    ),
     this.isHit = false,
+    this.isShotPossible = false,
+    this.targetEnemyPosition,
+    this.lastMissileShotTime,
   });
 
-  PlayerMoveMentState copyWith({
+  PlayerState copyWith({
     double? directionX,
     double? directionY,
     double? playerMoveX,
     double? playerMoveY,
+    PlayerModel? playerModel,
     bool? isHit,
+    bool? isShotPossible,
+    DateTime? lastMissileShotTime,
+    Offset? targetEnemyPosition,
   }) {
-    return PlayerMoveMentState(
+    return PlayerState(
       directionX: directionX ?? this.directionX,
       directionY: directionY ?? this.directionY,
       playerMoveX: playerMoveX ?? this.playerMoveX,
       playerMoveY: playerMoveY ?? this.playerMoveY,
+      playerModel: playerModel ?? this.playerModel,
       isHit: isHit ?? this.isHit,
+      isShotPossible: isShotPossible ?? this.isShotPossible,
+      lastMissileShotTime: lastMissileShotTime ?? this.lastMissileShotTime,
+      targetEnemyPosition: targetEnemyPosition ?? this.targetEnemyPosition,
     );
   }
 
@@ -91,6 +134,10 @@ class PlayerMoveMentState extends Equatable {
         directionY,
         playerMoveX,
         playerMoveY,
+        playerModel,
         isHit,
+        isShotPossible,
+        lastMissileShotTime,
+        targetEnemyPosition,
       ];
 }

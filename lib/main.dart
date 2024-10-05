@@ -5,7 +5,7 @@ import 'package:vampire_survivors_game/src/cubit/enemy_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/key_event_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/missile_manager.dart';
-import 'package:vampire_survivors_game/src/cubit/player_movement_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/player_manager.dart';
 import 'package:vampire_survivors_game/src/game_board.dart';
 
 void main() {
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       home: MultiBlocProvider(
         providers: [
           BlocProvider(create: (context) => GameManager()),
-          BlocProvider(create: (context) => PlayerMovementManager()),
+          BlocProvider(create: (context) => PlayerManager()),
           BlocProvider(create: (context) => BackboardManager()),
           BlocProvider(create: (context) => KeyEventManagerCubit()),
           BlocProvider(create: (context) => EnemyManager()),

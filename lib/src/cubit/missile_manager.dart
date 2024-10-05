@@ -26,7 +26,7 @@ class MissileManager extends Cubit<MissileState> {
     this.height = height;
     var x = width / 2 - 15 + sx + gunSectorType.adjustPoint.dx;
     var y = height / 2 - 15 + sy + gunSectorType.adjustPoint.dy;
-    var speed = 12.0;
+    var speed = 15.0;
     var missile = MissileModel(
       x: x,
       y: y,
