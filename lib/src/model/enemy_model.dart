@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
+import 'package:vampire_survivors_game/src/cubit/enemy_manager.dart';
+import 'package:vampire_survivors_game/src/enum/enemy_state_type.dart';
 
 class EnemyModel extends Equatable {
   final double areaWidth;
@@ -13,6 +15,8 @@ class EnemyModel extends Equatable {
   final double? knockbackPower;
   final int defense;
   final bool isHit;
+  final EnemyStateType state;
+  final DateTime? createdTime;
 
   const EnemyModel({
     this.areaWidth = 0.0,
@@ -25,6 +29,8 @@ class EnemyModel extends Equatable {
     this.defense = 1,
     this.knockbackPower,
     this.isHit = false,
+    this.state = EnemyStateType.READY,
+    this.createdTime,
   });
 
   double get tx => areaWidth / 2 - 15 + x;
@@ -41,6 +47,8 @@ class EnemyModel extends Equatable {
     double? knockbackPower,
     int? defense,
     bool? isHit,
+    EnemyStateType? state,
+    DateTime? createdTime,
   }) {
     return EnemyModel(
       areaWidth: areaWidth ?? this.areaWidth,
@@ -53,6 +61,8 @@ class EnemyModel extends Equatable {
       defense: defense ?? this.defense,
       knockbackPower: knockbackPower ?? this.knockbackPower,
       isHit: isHit ?? this.isHit,
+      state: state ?? this.state,
+      createdTime: createdTime ?? this.createdTime,
     );
   }
 
@@ -67,6 +77,8 @@ class EnemyModel extends Equatable {
         power,
         defense,
         knockbackPower,
+        state,
         isHit,
+        createdTime,
       ];
 }

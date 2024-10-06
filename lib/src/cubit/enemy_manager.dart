@@ -4,12 +4,29 @@ import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:vampire_survivors_game/src/components/missile.dart';
+import 'package:vampire_survivors_game/src/enum/enemy_state_type.dart';
 import 'package:vampire_survivors_game/src/model/enemy_model.dart';
 import 'package:vampire_survivors_game/src/model/missile_model.dart';
 import 'package:vampire_survivors_game/src/utils/data_util.dart';
 
 class EnemyManager extends Cubit<EnemyState> {
   EnemyManager() : super(const EnemyState());
+
+  canCreatedCheck(
+    double backgroundWidth,
+    double backgroundHeight,
+    double gapTime,
+    double enemyCount,
+  ) {
+    if (state.lastCreatedTime == null) {
+      create(backgroundWidth, backgroundHeight, enemyCount.toInt());
+    } else {
+      var now = DateTime.now();
+      if (now.difference(state.lastCreatedTime!).inSeconds > gapTime) {
+        create(backgroundWidth, backgroundHeight, enemyCount.toInt());
+      }
+    }
+  }
 
   create(double backgroundWidth, double backgroundHeight, int enemyCount) {
     for (var i = 0; i < enemyCount; i++) {
@@ -28,12 +45,23 @@ class EnemyManager extends Cubit<EnemyState> {
       x: x * (nx ? 1 : -1),
       y: y * (ny ? 1 : -1),
       speed: 3,
+      createdTime: DateTime.now(),
     );
-    emit(state.copyWith(enemies: [...state.enemies, enemy]));
+    emit(state.copyWith(
+      lastCreatedTime: DateTime.now(),
+      enemies: [...state.enemies, enemy],
+    ));
   }
 
   moveEnemy(double targetx, double targety) {
     var newEnemies = state.enemies.map((enemy) {
+      if (enemy.state == EnemyStateType.READY && enemy.createdTime != null) {
+        if (enemy.createdTime!
+            .isBefore(DateTime.now().subtract(const Duration(seconds: 2)))) {
+          return enemy.copyWith(state: EnemyStateType.ATTACK);
+        }
+        return enemy;
+      }
       var x = enemy.x;
       var y = enemy.y;
       var dx = targetx - x;
@@ -89,20 +117,22 @@ class EnemyManager extends Cubit<EnemyState> {
 
 class EnemyState extends Equatable {
   final List<EnemyModel> enemies;
+  final DateTime? lastCreatedTime;
   const EnemyState({
     this.enemies = const [],
+    this.lastCreatedTime,
   });
 
-  EnemyState copyWith({
-    List<EnemyModel>? enemies,
-  }) {
+  EnemyState copyWith({List<EnemyModel>? enemies, DateTime? lastCreatedTime}) {
     return EnemyState(
       enemies: enemies ?? this.enemies,
+      lastCreatedTime: lastCreatedTime ?? this.lastCreatedTime,
     );
   }
 
   @override
   List<Object?> get props => [
         enemies,
+        lastCreatedTime,
       ];
 }

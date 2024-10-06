@@ -16,6 +16,7 @@ import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/key_event_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/missile_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/player_manager.dart';
+import 'package:vampire_survivors_game/src/enum/enemy_state_type.dart';
 import 'package:vampire_survivors_game/src/enum/game_type.dart';
 import 'package:vampire_survivors_game/src/enum/gun_sector_type.dart';
 
@@ -44,6 +45,7 @@ class _GameBoardState extends State<GameBoard> {
 
   void _updateGame() {
     _moveBackground();
+    _createEnemy();
     _movePlayer();
     _moveEnemy();
     _moveMissile();
@@ -80,7 +82,12 @@ class _GameBoardState extends State<GameBoard> {
         .read<EnemyManager>()
         .checkDamage(context.read<MissileManager>().state.missiles);
     //적군 미사일 충돌감지
-    var enemies = context.read<EnemyManager>().state.enemies;
+    var enemies = context
+        .read<EnemyManager>()
+        .state
+        .enemies
+        .where((element) => element.state == EnemyStateType.ATTACK)
+        .toList();
     context.read<MissileManager>().checkColliding(enemies);
 
     //플레이어 충돌 감지
@@ -103,6 +110,22 @@ class _GameBoardState extends State<GameBoard> {
     context
         .read<PlayerManager>()
         .movePlayer(speed, gameZoneWidth, gameZoneHeight);
+  }
+
+  void _createEnemy() {
+    var gameState = context.read<GameManager>().state;
+    if (gameState.gameType != GameType.start) {
+      return;
+    }
+    var currentStage = context.read<GameManager>().state.stage;
+    var gapTime = currentStage.responeGapTime;
+    var oneTimeHowMany = currentStage.oneTimeEnemySpotCounts;
+
+    var width = context.read<BackboardManager>().state.gameZoneWidth * 2;
+    var height = context.read<BackboardManager>().state.gameZoneHeight * 2;
+    context
+        .read<EnemyManager>()
+        .canCreatedCheck(width, height, gapTime, oneTimeHowMany);
   }
 
   void _moveEnemy() {
@@ -141,11 +164,6 @@ class _GameBoardState extends State<GameBoard> {
           listener: (context, state) {
             switch (state.gameType) {
               case GameType.start:
-                var width =
-                    context.read<BackboardManager>().state.gameZoneWidth * 2;
-                var height =
-                    context.read<BackboardManager>().state.gameZoneHeight * 2;
-                context.read<EnemyManager>().create(width, height, 3);
                 break;
               case GameType.pause:
                 break;
@@ -171,20 +189,6 @@ class _GameBoardState extends State<GameBoard> {
             child: Focus(
               autofocus: true,
               onKeyEvent: (node, event) {
-                if (event.logicalKey == LogicalKeyboardKey.space &&
-                    event is KeyDownEvent) {
-                  context.read<MissileManager>().shotMissile(
-                        context.read<BackboardManager>().state.gameZoneWidth *
-                            2,
-                        context.read<BackboardManager>().state.gameZoneHeight *
-                            2,
-                        context.read<PlayerManager>().state.playerMoveX,
-                        context.read<PlayerManager>().state.playerMoveY,
-                        context.read<EnemyManager>().state.enemies.first.tx,
-                        context.read<EnemyManager>().state.enemies.first.ty,
-                        GunSectorType.TOP,
-                      );
-                }
                 if (event.logicalKey == LogicalKeyboardKey.escape) {
                   context.read<GameManager>().gamePause();
                 }
@@ -228,6 +232,7 @@ class _GameBoardState extends State<GameBoard> {
                                 x: enemy.tx,
                                 y: enemy.ty,
                                 isHit: enemy.isHit,
+                                type: enemy.state,
                               ))
                           .toList(),
                     );

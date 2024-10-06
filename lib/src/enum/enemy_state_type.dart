@@ -1,0 +1,4 @@
+enum EnemyStateType {
+  READY,
+  ATTACK,
+}
