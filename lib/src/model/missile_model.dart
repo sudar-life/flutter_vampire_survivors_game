@@ -1,13 +1,15 @@
 import 'package:equatable/equatable.dart';
 
 class MissileModel extends Equatable {
+  final String id;
   final double x;
   final double y;
   final double angle;
   final double speed;
   final double power;
 
-  const MissileModel({
+  MissileModel({
+    required this.id,
     this.x = 0.0,
     this.y = 0.0,
     this.angle = 0.0,
@@ -16,6 +18,7 @@ class MissileModel extends Equatable {
   });
 
   MissileModel copyWith({
+    String? id,
     double? x,
     double? y,
     double? angle,
@@ -23,6 +26,7 @@ class MissileModel extends Equatable {
     double? power,
   }) {
     return MissileModel(
+      id: (id ?? this.id),
       x: (x ?? this.x),
       y: (y ?? this.y),
       angle: (angle ?? this.angle),

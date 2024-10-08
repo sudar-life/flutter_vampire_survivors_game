@@ -16,6 +16,7 @@ class Enemy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (type == EnemyStateType.DEAD) return Container();
     return Positioned(
       left: x,
       top: y,

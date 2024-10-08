@@ -5,6 +5,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:vampire_survivors_game/src/components/missile.dart';
 import 'package:vampire_survivors_game/src/enum/enemy_state_type.dart';
+import 'package:vampire_survivors_game/src/enum/enemy_type.dart';
+import 'package:vampire_survivors_game/src/model/damage_info_model.dart';
 import 'package:vampire_survivors_game/src/model/enemy_model.dart';
 import 'package:vampire_survivors_game/src/model/missile_model.dart';
 import 'package:vampire_survivors_game/src/utils/data_util.dart';
@@ -17,24 +19,28 @@ class EnemyManager extends Cubit<EnemyState> {
     double backgroundHeight,
     double gapTime,
     double enemyCount,
+    List<EnemyType> enemyTypes,
   ) {
     if (state.lastCreatedTime == null) {
-      create(backgroundWidth, backgroundHeight, enemyCount.toInt());
+      create(backgroundWidth, backgroundHeight, enemyCount.toInt(), enemyTypes);
     } else {
       var now = DateTime.now();
       if (now.difference(state.lastCreatedTime!).inSeconds > gapTime) {
-        create(backgroundWidth, backgroundHeight, enemyCount.toInt());
+        create(
+            backgroundWidth, backgroundHeight, enemyCount.toInt(), enemyTypes);
       }
     }
   }
 
-  create(double backgroundWidth, double backgroundHeight, int enemyCount) {
+  create(double backgroundWidth, double backgroundHeight, int enemyCount,
+      List<EnemyType> enemyTypes) {
     for (var i = 0; i < enemyCount; i++) {
-      _createEnemy(backgroundWidth, backgroundHeight);
+      var enemyType = enemyTypes[Random().nextInt(enemyTypes.length)];
+      _createEnemy(backgroundWidth, backgroundHeight, enemyType);
     }
   }
 
-  _createEnemy(backgroundWidth, backgroundHeight) {
+  _createEnemy(backgroundWidth, backgroundHeight, EnemyType enemyType) {
     var x = Random().nextDouble() * backgroundWidth / 2;
     var y = Random().nextDouble() * backgroundHeight / 2;
     var nx = Random().nextBool();
@@ -44,7 +50,10 @@ class EnemyManager extends Cubit<EnemyState> {
       areaHeight: backgroundHeight,
       x: x * (nx ? 1 : -1),
       y: y * (ny ? 1 : -1),
-      speed: 3,
+      speed: enemyType.speed,
+      hp: enemyType.hp,
+      power: enemyType.power,
+      defense: enemyType.defense,
       createdTime: DateTime.now(),
     );
     emit(state.copyWith(
@@ -84,11 +93,15 @@ class EnemyManager extends Cubit<EnemyState> {
   }
 
   checkDamage(List<MissileModel?> missiles) {
+    var damagedPoints = state.damagedPoints ?? {};
+    var deadPoints = state.deadPoints ?? {};
     var newEnemies = state.enemies.map((enemy) {
       var x = enemy.tx + 15;
       var y = enemy.ty + 15;
       var radius = 15.0;
       double? missilePower;
+      Offset? hitPoint;
+      String? missileId;
       var isHit = missiles.any((missile) {
         if (missile == null) return false;
         var centerA = Offset(x, y);
@@ -103,30 +116,66 @@ class EnemyManager extends Cubit<EnemyState> {
         );
         if (isHit) {
           missilePower = missile.power;
+          hitPoint = centerB;
+          missileId = missile.id;
         }
         return isHit;
       });
+      if (isHit && hitPoint != null) {
+        if (damagedPoints.where((element) => element.id == missileId).isEmpty) {
+          damagedPoints.add(DamageInfoModel(
+            id: missileId!,
+            x: hitPoint!.dx,
+            y: hitPoint!.dy,
+            createdAt: DateTime.now(),
+            damage: missilePower!,
+          ));
+        }
+      }
+      if (enemy.hp <= 0) {
+        deadPoints.add(Offset(x, y));
+      }
       return enemy.copyWith(
         isHit: isHit,
+        hp: isHit ? enemy.hp - missilePower! : enemy.hp,
+        state: enemy.hp <= 0 ? EnemyStateType.DEAD : enemy.state,
         knockbackPower: missilePower,
+        getDamaged: missilePower,
+        damagedX: x,
+        damagedY: y,
       );
     });
-    emit(state.copyWith(enemies: [...newEnemies]));
+    emit(state.copyWith(
+      enemies: [...newEnemies],
+      damagedPoints: {...damagedPoints},
+      deadPoints: {...deadPoints},
+    ));
   }
 }
 
 class EnemyState extends Equatable {
   final List<EnemyModel> enemies;
+  final Set<DamageInfoModel>? damagedPoints;
+  final Set<Offset>? deadPoints;
   final DateTime? lastCreatedTime;
   const EnemyState({
     this.enemies = const [],
+    this.damagedPoints,
+    this.deadPoints,
     this.lastCreatedTime,
   });
 
-  EnemyState copyWith({List<EnemyModel>? enemies, DateTime? lastCreatedTime}) {
+  EnemyState copyWith({
+    List<EnemyModel>? enemies,
+    DateTime? lastCreatedTime,
+    Set<DamageInfoModel>? damagedPoints,
+    Set<Offset>? deadPoints,
+  }) {
     return EnemyState(
       enemies: enemies ?? this.enemies,
       lastCreatedTime: lastCreatedTime ?? this.lastCreatedTime,
+      damagedPoints: damagedPoints ?? this.damagedPoints,
+      deadPoints: deadPoints ?? this.deadPoints,
     );
   }
 
@@ -134,5 +183,7 @@ class EnemyState extends Equatable {
   List<Object?> get props => [
         enemies,
         lastCreatedTime,
+        damagedPoints,
+        deadPoints,
       ];
 }

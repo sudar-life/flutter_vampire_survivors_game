@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,11 +7,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vampire_survivors_game/src/components/background_board.dart';
 import 'package:vampire_survivors_game/src/components/background_decoration.dart';
+import 'package:vampire_survivors_game/src/components/damage_effect.dart';
 import 'package:vampire_survivors_game/src/components/enemy.dart';
 import 'package:vampire_survivors_game/src/components/gui.dart';
 import 'package:vampire_survivors_game/src/components/missile.dart';
 import 'package:vampire_survivors_game/src/components/player.dart';
 import 'package:vampire_survivors_game/src/cubit/backboard_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/damage_effect_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/enemy_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/key_event_manager.dart';
@@ -52,6 +55,11 @@ class _GameBoardState extends State<GameBoard> {
     _handleCollision();
     _updateDirection();
     _shotMissile();
+    _removeDamageEffect();
+  }
+
+  void _removeDamageEffect() {
+    context.read<DamageEffectManager>().removeDamageEffect();
   }
 
   void _shotMissile() {
@@ -117,15 +125,19 @@ class _GameBoardState extends State<GameBoard> {
     if (gameState.gameType != GameType.start) {
       return;
     }
-    var currentStage = context.read<GameManager>().state.stage;
+    var currentStage = gameState.stage;
     var gapTime = currentStage.responeGapTime;
     var oneTimeHowMany = currentStage.oneTimeEnemySpotCounts;
 
     var width = context.read<BackboardManager>().state.gameZoneWidth * 2;
     var height = context.read<BackboardManager>().state.gameZoneHeight * 2;
-    context
-        .read<EnemyManager>()
-        .canCreatedCheck(width, height, gapTime, oneTimeHowMany);
+    context.read<EnemyManager>().canCreatedCheck(
+          width,
+          height,
+          gapTime,
+          oneTimeHowMany,
+          currentStage.stagePerEnemyTypes,
+        );
   }
 
   void _moveEnemy() {
@@ -160,6 +172,18 @@ class _GameBoardState extends State<GameBoard> {
     keyManager = context.read<KeyEventManagerCubit>();
     return MultiBlocListener(
       listeners: [
+        BlocListener<EnemyManager, EnemyState>(
+          listenWhen: (previous, current) =>
+              previous.damagedPoints != current.damagedPoints,
+          listener: (context, state) {
+            state.damagedPoints?.where((d) {
+              if (!d.isExpired()) {
+                context.read<DamageEffectManager>().addDamage(d);
+              }
+              return false;
+            }).toList();
+          },
+        ),
         BlocListener<GameManager, GameState>(
           listener: (context, state) {
             switch (state.gameType) {
@@ -233,6 +257,19 @@ class _GameBoardState extends State<GameBoard> {
                                 y: enemy.ty,
                                 isHit: enemy.isHit,
                                 type: enemy.state,
+                              ))
+                          .toList(),
+                    );
+                  }),
+                  BlocBuilder<DamageEffectManager, DamageEffectState>(
+                      builder: (context, state) {
+                    print(state.damagedPoints.length);
+                    return Stack(
+                      children: state.damagedPoints
+                          .map((damage) => DamageEffect(
+                                x: damage.x,
+                                y: damage.y,
+                                damage: damage.damage,
                               ))
                           .toList(),
                     );

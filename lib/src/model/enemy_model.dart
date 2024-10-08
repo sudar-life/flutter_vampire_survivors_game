@@ -10,13 +10,16 @@ class EnemyModel extends Equatable {
   final double x;
   final double y;
   final double speed;
-  final int hp;
+  final double hp;
   final double power;
   final double? knockbackPower;
-  final int defense;
+  final double defense;
   final bool isHit;
   final EnemyStateType state;
   final DateTime? createdTime;
+  final double? getDamaged;
+  final double? damagedX;
+  final double? damagedY;
 
   const EnemyModel({
     this.areaWidth = 0.0,
@@ -31,10 +34,15 @@ class EnemyModel extends Equatable {
     this.isHit = false,
     this.state = EnemyStateType.READY,
     this.createdTime,
+    this.getDamaged,
+    this.damagedX,
+    this.damagedY,
   });
 
   double get tx => areaWidth / 2 - 15 + x;
   double get ty => areaHeight / 2 - 15 + y;
+  double get damageXP => areaWidth / 2 - 15 + (damagedX ?? x);
+  double get damageYP => areaHeight / 2 - 15 + (damagedY ?? y);
 
   EnemyModel copyWith({
     double? areaWidth,
@@ -42,13 +50,16 @@ class EnemyModel extends Equatable {
     double? x,
     double? y,
     double? speed,
-    int? hp,
+    double? hp,
     double? power,
     double? knockbackPower,
-    int? defense,
+    double? defense,
     bool? isHit,
     EnemyStateType? state,
     DateTime? createdTime,
+    double? getDamaged,
+    double? damagedX,
+    double? damagedY,
   }) {
     return EnemyModel(
       areaWidth: areaWidth ?? this.areaWidth,
@@ -63,6 +74,9 @@ class EnemyModel extends Equatable {
       isHit: isHit ?? this.isHit,
       state: state ?? this.state,
       createdTime: createdTime ?? this.createdTime,
+      getDamaged: getDamaged ?? this.getDamaged,
+      damagedX: damagedX ?? this.damagedX,
+      damagedY: damagedY ?? this.damagedY,
     );
   }
 
@@ -80,5 +94,7 @@ class EnemyModel extends Equatable {
         state,
         isHit,
         createdTime,
+        getDamaged,
+        damagedX,
       ];
 }

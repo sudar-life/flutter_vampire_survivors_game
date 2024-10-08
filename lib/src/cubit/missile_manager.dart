@@ -28,6 +28,7 @@ class MissileManager extends Cubit<MissileState> {
     var y = height / 2 - 15 + sy + gunSectorType.adjustPoint.dy;
     var speed = 15.0;
     var missile = MissileModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
       x: x,
       y: y,
       angle: atan2(((ty + 15) - y), ((tx + 15) - x)),
