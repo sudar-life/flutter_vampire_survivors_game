@@ -13,6 +13,10 @@ class MissileManager extends Cubit<MissileState> {
   double? height;
   MissileManager() : super(const MissileState());
 
+  init() {
+    emit(const MissileState());
+  }
+
   shotMissile(
     double width,
     double height,

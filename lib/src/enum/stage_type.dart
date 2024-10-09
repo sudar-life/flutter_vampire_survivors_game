@@ -29,6 +29,13 @@ enum StageType {
     EnemyType.middleBoss1,
     EnemyType.middleBoss2,
   ]),
+  stage4(50, 5, 1.5, [
+    EnemyType.noraml1,
+    EnemyType.normal2,
+    EnemyType.normal3,
+    EnemyType.middleBoss1,
+    EnemyType.middleBoss2,
+  ]),
   ;
 
   const StageType(

@@ -32,6 +32,10 @@ class EnemyManager extends Cubit<EnemyState> {
     }
   }
 
+  initEnemy() {
+    emit(const EnemyState());
+  }
+
   create(double backgroundWidth, double backgroundHeight, int enemyCount,
       List<EnemyType> enemyTypes) {
     for (var i = 0; i < enemyCount; i++) {

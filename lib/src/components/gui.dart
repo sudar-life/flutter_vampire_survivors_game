@@ -18,7 +18,7 @@ class Gui extends StatelessWidget {
           onPressed: () {
             context.read<GameManager>().gameStart();
           },
-          child: const Text('Start'),
+          child: const Text('게임시작'),
         ),
       );
     }
@@ -28,7 +28,23 @@ class Gui extends StatelessWidget {
           onPressed: () {
             context.read<GameManager>().gameResume();
           },
-          child: const Text('Resume'),
+          child: const Text('플레이'),
+        ),
+      );
+    }
+    if (state.gameType == GameType.end) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AppFont('Game Over', color: Colors.red, size: 70),
+            ElevatedButton(
+              onPressed: () {
+                context.read<GameManager>().gameRestart();
+              },
+              child: const Text('재시작'),
+            ),
+          ],
         ),
       );
     }

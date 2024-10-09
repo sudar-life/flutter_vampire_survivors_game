@@ -13,6 +13,10 @@ class PlayerManager extends Cubit<PlayerState> {
     emit(state.copyWith(directionX: 0.0, directionY: 0.0));
   }
 
+  initPlayer() {
+    emit(const PlayerState());
+  }
+
   updateDirection({double? directionX, double? directionY}) {
     emit(state.copyWith(
       directionX: state.directionX + (directionX ?? 0.0),
@@ -43,12 +47,18 @@ class PlayerManager extends Cubit<PlayerState> {
   checkColliding(List<EnemyModel> enemies) {
     var playerX = state.playerMoveX;
     var playerY = state.playerMoveY;
+    var enemyPower = 0.0;
     var isHit = enemies.any((enemy) {
       var centerA = Offset(playerX + 20, playerY + 20);
       var centerB = Offset(enemy.x + 15, enemy.y + 15);
       var radiusA = 20.0;
       var radiusB = 15.0;
-      return GameDataUtil.isCircleColliding(centerA, radiusA, centerB, radiusB);
+      var isHit =
+          GameDataUtil.isCircleColliding(centerA, radiusA, centerB, radiusB);
+      if (isHit) {
+        enemyPower = enemy.power * 2;
+      }
+      return isHit;
     });
     Offset? targetEnemyPosition;
     var isShotPossible = enemies.any((enemy) {
@@ -60,12 +70,17 @@ class PlayerManager extends Cubit<PlayerState> {
           GameDataUtil.isCircleColliding(centerA, radiusA, centerB, radiusB);
       if (isPossibleShot) {
         targetEnemyPosition = Offset(enemy.tx + 15, enemy.ty + 15);
-        ;
       }
       return isPossibleShot;
     });
+    var currentHp = state.playerModel.hp - enemyPower;
+    if (currentHp < 0) {
+      currentHp = 0;
+    }
     emit(state.copyWith(
       isHit: isHit,
+      playerModel: state.playerModel.copyWith(hp: currentHp),
+      isDead: currentHp == 0,
       isShotPossible: isShotPossible,
       targetEnemyPosition: targetEnemyPosition,
     ));
@@ -86,14 +101,17 @@ class PlayerState extends Equatable {
   final PlayerModel playerModel;
   final DateTime? lastMissileShotTime;
   final Offset? targetEnemyPosition;
+  final bool isDead;
 
   const PlayerState({
     this.directionX = 0.0,
     this.directionY = 0.0,
     this.playerMoveX = 0.0,
     this.playerMoveY = 0.0,
+    this.isDead = false,
     this.playerModel = const PlayerModel(
       hp: 100,
+      maxHp: 100,
       attackSpeed: 1000,
       moveSpeed: 1,
       attackBoundaryRadius: 150,
@@ -111,6 +129,7 @@ class PlayerState extends Equatable {
     double? playerMoveY,
     PlayerModel? playerModel,
     bool? isHit,
+    bool? isDead,
     bool? isShotPossible,
     DateTime? lastMissileShotTime,
     Offset? targetEnemyPosition,
@@ -122,6 +141,7 @@ class PlayerState extends Equatable {
       playerMoveY: playerMoveY ?? this.playerMoveY,
       playerModel: playerModel ?? this.playerModel,
       isHit: isHit ?? this.isHit,
+      isDead: isDead ?? this.isDead,
       isShotPossible: isShotPossible ?? this.isShotPossible,
       lastMissileShotTime: lastMissileShotTime ?? this.lastMissileShotTime,
       targetEnemyPosition: targetEnemyPosition ?? this.targetEnemyPosition,
@@ -136,6 +156,7 @@ class PlayerState extends Equatable {
         playerMoveY,
         playerModel,
         isHit,
+        isDead,
         isShotPossible,
         lastMissileShotTime,
         targetEnemyPosition,

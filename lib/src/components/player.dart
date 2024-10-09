@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vampire_survivors_game/src/components/hp_bar.dart';
 import 'package:vampire_survivors_game/src/cubit/player_manager.dart';
 
 class Player extends StatelessWidget {
@@ -107,6 +108,16 @@ class Player extends StatelessWidget {
               ),
             ),
           ),
+          Positioned(
+            bottom: 120,
+            left: 0,
+            right: 0,
+            child: Center(
+                child: HpBar(
+              hp: state.playerModel.hp,
+              maxHp: state.playerModel.maxHp,
+            )),
+          )
         ],
       ),
     );

@@ -11,7 +11,6 @@ class DamageEffectManager extends Cubit<DamageEffectState> {
 
   void addDamage(DamageInfoModel damageInfo) {
     var isEmpty = state.damagedPoints.where((p) => p == damageInfo).isEmpty;
-    print('add.damagedPoints.length : ${state.damagedPoints.length}');
     if (isEmpty) {
       emit(state.copyWith(
         damagedPoints: {
@@ -27,7 +26,12 @@ class DamageEffectManager extends Cubit<DamageEffectState> {
     emit(state.copyWith(
       damagedPoints: {...state.damagedPoints},
     ));
-    print('state.damagedPoints.length : ${state.damagedPoints.length}');
+  }
+
+  void clear() {
+    emit(state.copyWith(
+      damagedPoints: {},
+    ));
   }
 }
 

@@ -3,6 +3,10 @@ import 'package:equatable/equatable.dart';
 
 class BackboardManager extends Cubit<BackboardState> {
   BackboardManager() : super(const BackboardState());
+  init() {
+    emit(state.copyWith(backgroundMoveX: 0.0, backgroundMoveY: 0.0));
+  }
+
   updateGameZoneSize(double gameZoneWidth, double gameZoneHeight) {
     emit(state.copyWith(
       gameZoneWidth: gameZoneWidth,

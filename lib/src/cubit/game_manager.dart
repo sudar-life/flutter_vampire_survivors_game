@@ -7,7 +7,16 @@ class GameManager extends Cubit<GameState> {
   GameManager() : super(const GameState());
 
   gameStart() {
-    emit(state.copyWith(gameType: GameType.start));
+    emit(state.copyWith(
+      gameType: GameType.start,
+      stage: StageType.stage1,
+    ));
+  }
+
+  gameRestart() {
+    emit(state.copyWith(
+      gameType: GameType.restart,
+    ));
   }
 
   gamePause() {

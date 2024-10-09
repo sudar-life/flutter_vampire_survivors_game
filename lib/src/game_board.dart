@@ -40,7 +40,8 @@ class _GameBoardState extends State<GameBoard> {
 
     Timer.periodic(const Duration(milliseconds: 30), (timer) {
       if (context.read<GameManager>().state.gameType == GameType.start ||
-          context.read<GameManager>().state.gameType == GameType.resume) {
+          context.read<GameManager>().state.gameType == GameType.resume ||
+          context.read<GameManager>().state.gameType == GameType.restart) {
         _updateGame();
       }
     });
@@ -122,7 +123,8 @@ class _GameBoardState extends State<GameBoard> {
 
   void _createEnemy() {
     var gameState = context.read<GameManager>().state;
-    if (gameState.gameType != GameType.start) {
+    if (gameState.gameType != GameType.start &&
+        gameState.gameType != GameType.restart) {
       return;
     }
     var currentStage = gameState.stage;
@@ -184,6 +186,11 @@ class _GameBoardState extends State<GameBoard> {
             }).toList();
           },
         ),
+        BlocListener<PlayerManager, PlayerState>(listener: (context, state) {
+          if (state.isDead) {
+            context.read<GameManager>().gameEnd();
+          }
+        }),
         BlocListener<GameManager, GameState>(
           listener: (context, state) {
             switch (state.gameType) {
@@ -196,6 +203,14 @@ class _GameBoardState extends State<GameBoard> {
               case GameType.end:
                 break;
               case GameType.idle:
+                break;
+              case GameType.restart:
+                context.read<PlayerManager>().initPlayer();
+                context.read<EnemyManager>().initEnemy();
+                context.read<BackboardManager>().init();
+                context.read<MissileManager>().init();
+                context.read<DamageEffectManager>().clear();
+                context.read<GameManager>().gameStart();
                 break;
             }
           },
