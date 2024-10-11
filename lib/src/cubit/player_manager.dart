@@ -2,7 +2,9 @@ import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:vampire_survivors_game/src/enum/field_item_type.dart';
 import 'package:vampire_survivors_game/src/model/enemy_model.dart';
+import 'package:vampire_survivors_game/src/model/field_item_model.dart';
 import 'package:vampire_survivors_game/src/model/player_model.dart';
 import 'package:vampire_survivors_game/src/utils/data_util.dart';
 
@@ -89,6 +91,41 @@ class PlayerManager extends Cubit<PlayerState> {
   updatedShotMissileTime() {
     emit(state.copyWith(lastMissileShotTime: DateTime.now()));
   }
+
+  getItems(List<FieldItemModel> items) {
+    for (int i = 0; i < items.length; i++) {
+      var item = items[i];
+      switch (item.type) {
+        case FieldItemType.XP:
+          updateXp(item);
+          break;
+        case FieldItemType.HEAL:
+          emit(state.copyWith(
+            playerModel: state.playerModel
+                .copyWith(hp: state.playerModel.hp + item.value),
+          ));
+          break;
+      }
+    }
+  }
+
+  updateXp(FieldItemModel item) {
+    if (state.playerModel.xp + item.value <= state.playerModel.nextLevelXp) {
+      emit(state.copyWith(
+        playerModel: state.playerModel.copyWith(
+          xp: state.playerModel.xp + item.value,
+        ),
+      ));
+    } else {
+      emit(state.copyWith(
+        playerModel: state.playerModel.copyWith(
+          xp: 0,
+          level: state.playerModel.level + 1,
+          nextLevelXp: state.playerModel.nextLevelXp * 2,
+        ),
+      ));
+    }
+  }
 }
 
 class PlayerState extends Equatable {
@@ -115,6 +152,8 @@ class PlayerState extends Equatable {
       attackSpeed: 1000,
       moveSpeed: 1,
       attackBoundaryRadius: 150,
+      xp: 0,
+      nextLevelXp: 100,
     ),
     this.isHit = false,
     this.isShotPossible = false,

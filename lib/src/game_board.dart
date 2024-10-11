@@ -9,19 +9,23 @@ import 'package:vampire_survivors_game/src/components/background_board.dart';
 import 'package:vampire_survivors_game/src/components/background_decoration.dart';
 import 'package:vampire_survivors_game/src/components/damage_effect.dart';
 import 'package:vampire_survivors_game/src/components/enemy.dart';
+import 'package:vampire_survivors_game/src/components/field_item.dart';
 import 'package:vampire_survivors_game/src/components/gui.dart';
 import 'package:vampire_survivors_game/src/components/missile.dart';
 import 'package:vampire_survivors_game/src/components/player.dart';
 import 'package:vampire_survivors_game/src/cubit/backboard_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/damage_effect_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/enemy_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/field_item_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/key_event_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/missile_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/player_manager.dart';
 import 'package:vampire_survivors_game/src/enum/enemy_state_type.dart';
+import 'package:vampire_survivors_game/src/enum/field_item_type.dart';
 import 'package:vampire_survivors_game/src/enum/game_type.dart';
 import 'package:vampire_survivors_game/src/enum/gun_sector_type.dart';
+import 'package:vampire_survivors_game/src/model/field_item_model.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -101,6 +105,11 @@ class _GameBoardState extends State<GameBoard> {
 
     //플레이어 충돌 감지
     context.read<PlayerManager>().checkColliding(enemies);
+
+    // field item 충돌 감지
+    var playerX = context.read<PlayerManager>().state.playerMoveX;
+    var playerY = context.read<PlayerManager>().state.playerMoveY;
+    context.read<FieldItemManager>().checkColliding(playerX, playerY, 10);
   }
 
   void _moveBackground() {
@@ -174,11 +183,35 @@ class _GameBoardState extends State<GameBoard> {
     keyManager = context.read<KeyEventManagerCubit>();
     return MultiBlocListener(
       listeners: [
+        BlocListener<FieldItemManager, FieldItemState>(
+          listenWhen: (previous, current) =>
+              previous.getItems.length != current.getItems.length,
+          listener: (context, state) {
+            context.read<PlayerManager>().getItems(state.getItems.toList());
+            context.read<FieldItemManager>().clearGetItems();
+          },
+        ),
+        BlocListener<EnemyManager, EnemyState>(listenWhen: (previous, current) {
+          return previous.deadEnemies.length != current.deadEnemies.length;
+        }, listener: (context, state) {
+          state.deadEnemies.where((d) {
+            var xpItem = FieldItemModel(
+              areaWidth: d.areaWidth,
+              areaHeight: d.areaHeight,
+              type: FieldItemType.XP,
+              value: d.xp,
+              x: d.x,
+              y: d.y,
+            );
+            context.read<FieldItemManager>().addFieldItem(xpItem);
+            return false;
+          }).toList();
+        }),
         BlocListener<EnemyManager, EnemyState>(
           listenWhen: (previous, current) =>
-              previous.damagedPoints != current.damagedPoints,
+              previous.damagedPoints.length != current.damagedPoints?.length,
           listener: (context, state) {
-            state.damagedPoints?.where((d) {
+            state.damagedPoints.where((d) {
               if (!d.isExpired()) {
                 context.read<DamageEffectManager>().addDamage(d);
               }
@@ -276,9 +309,20 @@ class _GameBoardState extends State<GameBoard> {
                           .toList(),
                     );
                   }),
+                  BlocBuilder<FieldItemManager, FieldItemState>(
+                      builder: (context, state) {
+                    return Stack(
+                      children: state.fieldItems
+                          .map((item) => FieldItem(
+                                x: item.tx,
+                                y: item.ty,
+                                type: item.type,
+                              ))
+                          .toList(),
+                    );
+                  }),
                   BlocBuilder<DamageEffectManager, DamageEffectState>(
                       builder: (context, state) {
-                    print(state.damagedPoints.length);
                     return Stack(
                       children: state.damagedPoints
                           .map((damage) => DamageEffect(

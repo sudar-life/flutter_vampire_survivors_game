@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vampire_survivors_game/src/cubit/backboard_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/damage_effect_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/enemy_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/field_item_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/key_event_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/missile_manager.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
           BlocProvider(create: (context) => EnemyManager()),
           BlocProvider(create: (context) => MissileManager()),
           BlocProvider(create: (context) => DamageEffectManager()),
+          BlocProvider(create: (context) => FieldItemManager()),
         ],
         child: const GameBoard(),
       ),

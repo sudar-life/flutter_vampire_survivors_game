@@ -11,6 +11,7 @@ class EnemyModel extends Equatable {
   final double y;
   final double speed;
   final double hp;
+  final double xp;
   final double power;
   final double? knockbackPower;
   final double defense;
@@ -20,6 +21,7 @@ class EnemyModel extends Equatable {
   final double? getDamaged;
   final double? damagedX;
   final double? damagedY;
+  final bool? useDropItemWithXp;
 
   const EnemyModel({
     this.areaWidth = 0.0,
@@ -28,6 +30,7 @@ class EnemyModel extends Equatable {
     this.y = 0.0,
     this.speed = 3,
     this.hp = 10,
+    this.xp = 10,
     this.power = 0.5,
     this.defense = 1,
     this.knockbackPower,
@@ -37,6 +40,7 @@ class EnemyModel extends Equatable {
     this.getDamaged,
     this.damagedX,
     this.damagedY,
+    this.useDropItemWithXp = false,
   });
 
   double get tx => areaWidth / 2 - 15 + x;
@@ -51,6 +55,7 @@ class EnemyModel extends Equatable {
     double? y,
     double? speed,
     double? hp,
+    double? xp,
     double? power,
     double? knockbackPower,
     double? defense,
@@ -60,6 +65,7 @@ class EnemyModel extends Equatable {
     double? getDamaged,
     double? damagedX,
     double? damagedY,
+    bool? useDropItemWithXp,
   }) {
     return EnemyModel(
       areaWidth: areaWidth ?? this.areaWidth,
@@ -68,6 +74,7 @@ class EnemyModel extends Equatable {
       y: (y ?? this.y),
       speed: speed ?? this.speed,
       hp: hp ?? this.hp,
+      xp: xp ?? this.xp,
       power: power ?? this.power,
       defense: defense ?? this.defense,
       knockbackPower: knockbackPower ?? this.knockbackPower,
@@ -77,6 +84,7 @@ class EnemyModel extends Equatable {
       getDamaged: getDamaged ?? this.getDamaged,
       damagedX: damagedX ?? this.damagedX,
       damagedY: damagedY ?? this.damagedY,
+      useDropItemWithXp: useDropItemWithXp ?? this.useDropItemWithXp,
     );
   }
 
@@ -88,6 +96,7 @@ class EnemyModel extends Equatable {
         y,
         speed,
         hp,
+        xp,
         power,
         defense,
         knockbackPower,
@@ -96,5 +105,6 @@ class EnemyModel extends Equatable {
         createdTime,
         getDamaged,
         damagedX,
+        useDropItemWithXp,
       ];
 }

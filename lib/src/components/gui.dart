@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vampire_survivors_game/src/components/app_font.dart';
+import 'package:vampire_survivors_game/src/components/gui/xp_bar.dart';
 import 'package:vampire_survivors_game/src/components/timer.dart';
 import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
 import 'package:vampire_survivors_game/src/enum/game_type.dart';
@@ -55,16 +56,7 @@ class Gui extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            height: 15,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(3),
-              color: Colors.white.withOpacity(0.5),
-              border: Border.all(
-                color: Colors.white,
-              ),
-            ),
-          ),
+          XpBar(),
           SizedBox(height: 5),
           BlocBuilder<GameManager, GameState>(
             builder: (context, state) {

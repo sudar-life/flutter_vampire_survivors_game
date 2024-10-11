@@ -22,9 +22,10 @@ class DamageEffectManager extends Cubit<DamageEffectState> {
   }
 
   void removeDamageEffect() {
-    state.damagedPoints.removeWhere((item) => item.isExpired());
+    var t = {...state.damagedPoints};
+    t.removeWhere((item) => item.isExpired());
     emit(state.copyWith(
-      damagedPoints: {...state.damagedPoints},
+      damagedPoints: {...t},
     ));
   }
 

@@ -6,6 +6,9 @@ class PlayerModel extends Equatable {
   final double attackBoundaryRadius;
   final double attackSpeed;
   final double moveSpeed;
+  final double xp;
+  final double nextLevelXp;
+  final int level;
 
   const PlayerModel({
     required this.hp,
@@ -13,6 +16,9 @@ class PlayerModel extends Equatable {
     required this.attackSpeed,
     required this.moveSpeed,
     required this.attackBoundaryRadius,
+    required this.xp,
+    required this.nextLevelXp,
+    this.level = 1,
   });
 
   PlayerModel copyWith({
@@ -21,6 +27,9 @@ class PlayerModel extends Equatable {
     double? attackSpeed,
     double? moveSpeed,
     double? attackBoundaryRadius,
+    double? xp,
+    double? nextLevelXp,
+    int? level,
   }) {
     return PlayerModel(
       hp: hp ?? this.hp,
@@ -28,6 +37,9 @@ class PlayerModel extends Equatable {
       attackSpeed: attackSpeed ?? this.attackSpeed,
       moveSpeed: moveSpeed ?? this.moveSpeed,
       attackBoundaryRadius: attackBoundaryRadius ?? this.attackBoundaryRadius,
+      xp: xp ?? this.xp,
+      nextLevelXp: nextLevelXp ?? this.nextLevelXp,
+      level: level ?? this.level,
     );
   }
 
@@ -38,5 +50,8 @@ class PlayerModel extends Equatable {
         attackSpeed,
         moveSpeed,
         attackBoundaryRadius,
+        xp,
+        nextLevelXp,
+        level,
       ];
 }

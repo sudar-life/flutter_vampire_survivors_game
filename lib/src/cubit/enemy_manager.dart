@@ -56,6 +56,7 @@ class EnemyManager extends Cubit<EnemyState> {
       y: y * (ny ? 1 : -1),
       speed: enemyType.speed,
       hp: enemyType.hp,
+      xp: enemyType.xp,
       power: enemyType.power,
       defense: enemyType.defense,
       createdTime: DateTime.now(),
@@ -97,8 +98,8 @@ class EnemyManager extends Cubit<EnemyState> {
   }
 
   checkDamage(List<MissileModel?> missiles) {
-    var damagedPoints = state.damagedPoints ?? {};
-    var deadPoints = state.deadPoints ?? {};
+    var damagedPoints = <DamageInfoModel>{};
+    var deadEnemies = <EnemyModel>{};
     var newEnemies = state.enemies.map((enemy) {
       var x = enemy.tx + 15;
       var y = enemy.ty + 15;
@@ -126,7 +127,9 @@ class EnemyManager extends Cubit<EnemyState> {
         return isHit;
       });
       if (isHit && hitPoint != null) {
-        if (damagedPoints.where((element) => element.id == missileId).isEmpty) {
+        if (state.damagedPoints!
+            .where((element) => element.id == missileId)
+            .isEmpty) {
           damagedPoints.add(DamageInfoModel(
             id: missileId!,
             x: hitPoint!.dx,
@@ -136,8 +139,8 @@ class EnemyManager extends Cubit<EnemyState> {
           ));
         }
       }
-      if (enemy.hp <= 0) {
-        deadPoints.add(Offset(x, y));
+      if (enemy.hp <= 0 && enemy.state != EnemyStateType.DEAD) {
+        deadEnemies.add(enemy);
       }
       return enemy.copyWith(
         isHit: isHit,
@@ -151,21 +154,21 @@ class EnemyManager extends Cubit<EnemyState> {
     });
     emit(state.copyWith(
       enemies: [...newEnemies],
-      damagedPoints: {...damagedPoints},
-      deadPoints: {...deadPoints},
+      damagedPoints: {...state.damagedPoints, ...damagedPoints},
+      deadEnemies: {...deadEnemies},
     ));
   }
 }
 
 class EnemyState extends Equatable {
   final List<EnemyModel> enemies;
-  final Set<DamageInfoModel>? damagedPoints;
-  final Set<Offset>? deadPoints;
+  final Set<DamageInfoModel> damagedPoints;
+  final Set<EnemyModel> deadEnemies;
   final DateTime? lastCreatedTime;
   const EnemyState({
     this.enemies = const [],
-    this.damagedPoints,
-    this.deadPoints,
+    this.damagedPoints = const {},
+    this.deadEnemies = const {},
     this.lastCreatedTime,
   });
 
@@ -173,13 +176,13 @@ class EnemyState extends Equatable {
     List<EnemyModel>? enemies,
     DateTime? lastCreatedTime,
     Set<DamageInfoModel>? damagedPoints,
-    Set<Offset>? deadPoints,
+    Set<EnemyModel>? deadEnemies,
   }) {
     return EnemyState(
       enemies: enemies ?? this.enemies,
       lastCreatedTime: lastCreatedTime ?? this.lastCreatedTime,
       damagedPoints: damagedPoints ?? this.damagedPoints,
-      deadPoints: deadPoints ?? this.deadPoints,
+      deadEnemies: deadEnemies ?? this.deadEnemies,
     );
   }
 
@@ -188,6 +191,6 @@ class EnemyState extends Equatable {
         enemies,
         lastCreatedTime,
         damagedPoints,
-        deadPoints,
+        deadEnemies,
       ];
 }

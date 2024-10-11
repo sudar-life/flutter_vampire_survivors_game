@@ -2,7 +2,7 @@ import 'package:vampire_survivors_game/src/enum/enemy_type.dart';
 
 enum StageType {
   stage1(
-    18,
+    30,
     2,
     2,
     [
@@ -12,7 +12,7 @@ enum StageType {
     ],
   ),
   stage2(
-    25,
+    45,
     3,
     2,
     [
@@ -22,14 +22,14 @@ enum StageType {
       EnemyType.middleBoss1,
     ],
   ),
-  stage3(35, 4, 1.5, [
+  stage3(60, 4, 1.5, [
     EnemyType.noraml1,
     EnemyType.normal2,
     EnemyType.normal3,
     EnemyType.middleBoss1,
     EnemyType.middleBoss2,
   ]),
-  stage4(50, 5, 1.5, [
+  stage4(90, 5, 1.5, [
     EnemyType.noraml1,
     EnemyType.normal2,
     EnemyType.normal3,
