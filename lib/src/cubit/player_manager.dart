@@ -122,6 +122,7 @@ class PlayerManager extends Cubit<PlayerState> {
           xp: 0,
           level: state.playerModel.level + 1,
           nextLevelXp: state.playerModel.nextLevelXp * 2,
+          hp: state.playerModel.maxHp,
         ),
       ));
     }

@@ -3,6 +3,7 @@ enum GameType {
   start,
   restart,
   resume,
+  selectItem,
   pause,
   end,
 }

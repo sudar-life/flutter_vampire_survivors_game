@@ -19,8 +19,10 @@ import 'package:vampire_survivors_game/src/cubit/enemy_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/field_item_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/key_event_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/levelup_item_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/missile_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/player_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/timer_manager.dart';
 import 'package:vampire_survivors_game/src/enum/enemy_state_type.dart';
 import 'package:vampire_survivors_game/src/enum/field_item_type.dart';
 import 'package:vampire_survivors_game/src/enum/game_type.dart';
@@ -199,7 +201,7 @@ class _GameBoardState extends State<GameBoard> {
               areaWidth: d.areaWidth,
               areaHeight: d.areaHeight,
               type: FieldItemType.XP,
-              value: d.xp,
+              value: d.xp * 100,
               x: d.x,
               y: d.y,
             );
@@ -209,7 +211,7 @@ class _GameBoardState extends State<GameBoard> {
         }),
         BlocListener<EnemyManager, EnemyState>(
           listenWhen: (previous, current) =>
-              previous.damagedPoints.length != current.damagedPoints?.length,
+              previous.damagedPoints.length != current.damagedPoints.length,
           listener: (context, state) {
             state.damagedPoints.where((d) {
               if (!d.isExpired()) {
@@ -223,15 +225,26 @@ class _GameBoardState extends State<GameBoard> {
           if (state.isDead) {
             context.read<GameManager>().gameEnd();
           }
+          if (state.playerModel.level > 1 && state.playerModel.xp == 0) {
+            context
+                .read<LevelUpItemManager>()
+                .makeRandomItems(state.playerModel.luckPercent);
+            context.read<GameManager>().selectItemMode();
+          }
         }),
         BlocListener<GameManager, GameState>(
           listener: (context, state) {
             switch (state.gameType) {
               case GameType.start:
+                context
+                    .read<TimerManater>()
+                    .startTime(state.stage.runningTime.toInt());
                 break;
               case GameType.pause:
+                context.read<TimerManater>().pauseTime();
                 break;
               case GameType.resume:
+                context.read<TimerManater>().resumeTime();
                 break;
               case GameType.end:
                 break;
@@ -244,6 +257,9 @@ class _GameBoardState extends State<GameBoard> {
                 context.read<MissileManager>().init();
                 context.read<DamageEffectManager>().clear();
                 context.read<GameManager>().gameStart();
+                break;
+              case GameType.selectItem:
+                context.read<TimerManater>().pauseTime();
                 break;
             }
           },

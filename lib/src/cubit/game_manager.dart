@@ -34,6 +34,10 @@ class GameManager extends Cubit<GameState> {
   nextStage() {
     emit(state.copyWith(stage: StageType.values[state.stage.index + 1]));
   }
+
+  selectItemMode() {
+    emit(state.copyWith(gameType: GameType.selectItem));
+  }
 }
 
 class GameState extends Equatable {

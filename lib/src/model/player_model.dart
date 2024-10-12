@@ -8,6 +8,7 @@ class PlayerModel extends Equatable {
   final double moveSpeed;
   final double xp;
   final double nextLevelXp;
+  final int luckPercent;
   final int level;
 
   const PlayerModel({
@@ -18,6 +19,7 @@ class PlayerModel extends Equatable {
     required this.attackBoundaryRadius,
     required this.xp,
     required this.nextLevelXp,
+    this.luckPercent = 0,
     this.level = 1,
   });
 
@@ -29,6 +31,7 @@ class PlayerModel extends Equatable {
     double? attackBoundaryRadius,
     double? xp,
     double? nextLevelXp,
+    int? luckPercent,
     int? level,
   }) {
     return PlayerModel(
@@ -40,6 +43,7 @@ class PlayerModel extends Equatable {
       xp: xp ?? this.xp,
       nextLevelXp: nextLevelXp ?? this.nextLevelXp,
       level: level ?? this.level,
+      luckPercent: luckPercent ?? this.luckPercent,
     );
   }
 
@@ -53,5 +57,6 @@ class PlayerModel extends Equatable {
         xp,
         nextLevelXp,
         level,
+        luckPercent,
       ];
 }

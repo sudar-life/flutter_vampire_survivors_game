@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vampire_survivors_game/src/components/app_font.dart';
+import 'package:vampire_survivors_game/src/components/gui/item_select_ui.dart';
 import 'package:vampire_survivors_game/src/components/gui/xp_bar.dart';
 import 'package:vampire_survivors_game/src/components/timer.dart';
 import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/timer_manager.dart';
 import 'package:vampire_survivors_game/src/enum/game_type.dart';
 
 class Gui extends StatelessWidget {
@@ -49,6 +51,9 @@ class Gui extends StatelessWidget {
         ),
       );
     }
+    if (state.gameType == GameType.selectItem) {
+      return ItemSelectUi();
+    }
     return Positioned(
       top: 15,
       left: 15,
@@ -68,11 +73,19 @@ class Gui extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     textAlign: TextAlign.center,
                   ),
-                  TimerWidget(
-                    initTime: state.stage.runningTime,
-                    isOverTime: () {
-                      context.read<GameManager>().nextStage();
+                  BlocListener<TimerManater, TimerState>(
+                    listener: (context, state) {
+                      if (state.state == TimeStateType.end) {
+                        context.read<GameManager>().nextStage();
+                        context.read<TimerManater>().startTime(context
+                            .read<GameManager>()
+                            .state
+                            .stage
+                            .runningTime
+                            .toInt());
+                      }
                     },
+                    child: const TimerWidget(),
                   ),
                 ],
               );
