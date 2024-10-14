@@ -109,7 +109,7 @@ class Player extends StatelessWidget {
             ),
           ),
           Positioned(
-            bottom: 120,
+            top: state.playerModel.attackBoundaryRadius + 30,
             left: 0,
             right: 0,
             child: Center(

@@ -38,7 +38,6 @@ class GameBoard extends StatefulWidget {
 
 class _GameBoardState extends State<GameBoard> {
   late KeyEventManagerCubit keyManager;
-  double speed = 6;
 
   @override
   void initState() {
@@ -115,21 +114,20 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void _moveBackground() {
+    var playerState = context.read<PlayerManager>().state;
     context.read<BackboardManager>().moveBackground(
-          directionX: context.read<PlayerManager>().state.directionX,
-          directionY: context.read<PlayerManager>().state.directionY,
-          playerMoveX: context.read<PlayerManager>().state.playerMoveX,
-          playerMoveY: context.read<PlayerManager>().state.playerMoveY,
-          speed: speed,
+          directionX: playerState.directionX,
+          directionY: playerState.directionY,
+          playerMoveX: playerState.playerMoveX,
+          playerMoveY: playerState.playerMoveY,
+          speed: playerState.playerModel.moveSpeed,
         );
   }
 
   void _movePlayer() {
     var gameZoneWidth = context.read<BackboardManager>().state.gameZoneWidth;
     var gameZoneHeight = context.read<BackboardManager>().state.gameZoneHeight;
-    context
-        .read<PlayerManager>()
-        .movePlayer(speed, gameZoneWidth, gameZoneHeight);
+    context.read<PlayerManager>().movePlayer(gameZoneWidth, gameZoneHeight);
   }
 
   void _createEnemy() {

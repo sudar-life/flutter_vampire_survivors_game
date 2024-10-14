@@ -27,7 +27,7 @@ class ItemSelectUi extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(
-            state.randomItemGrades.length,
+            state.items.length,
             (index) => Container(
               width: 200,
               height: 200,
@@ -50,15 +50,31 @@ class ItemSelectUi extends StatelessWidget {
                     height: 60,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: state.randomItemGrades[index].color,
+                      color: state.items[index].gradeType!.color,
                     ),
                   ),
                   const SizedBox(height: 10),
                   AppFont(
-                    'XXX 아이템 (${state.randomItemGrades[index].name} 등급)',
+                    '${state.items[index].itmeName} (${state.items[index].gradeType!.name} 등급)',
                     size: 16,
-                    color: state.randomItemGrades[index].color,
+                    color: state.items[index].gradeType!.color,
                   ),
+                  const SizedBox(height: 10),
+                  AppFont(
+                    '${state.items[index].mainItem!.stateLabel} ${state.items[index].mainItem!.val[state.items[index].gradeType!.index]}${state.items[index].mainItem!.unit}증가',
+                    size: 13,
+                    color: Colors.black,
+                  ),
+                  if ((state.items[index].subItems ?? []).isNotEmpty)
+                    ...state.items[index].subItems!
+                        .map(
+                          (subItem) => AppFont(
+                            '${subItem.stateLabel} ${subItem.val[state.items[index].gradeType!.index]}${subItem.unit}증가',
+                            size: 13,
+                            color: Colors.black,
+                          ),
+                        )
+                        .toList(),
                 ],
               ),
             ),

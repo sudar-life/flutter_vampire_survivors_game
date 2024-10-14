@@ -26,10 +26,12 @@ class PlayerManager extends Cubit<PlayerState> {
     ));
   }
 
-  movePlayer(double speed, double gameZoneWidth, double gameZoneHeight) {
+  movePlayer(double gameZoneWidth, double gameZoneHeight) {
     emit(state.copyWith(
-      playerMoveX: state.playerMoveX - state.directionX * speed,
-      playerMoveY: state.playerMoveY - state.directionY * speed,
+      playerMoveX:
+          state.playerMoveX - state.directionX * state.playerModel.moveSpeed,
+      playerMoveY:
+          state.playerMoveY - state.directionY * state.playerModel.moveSpeed,
     ));
 
     if (state.playerMoveX - 15 <= gameZoneWidth * -1) {
@@ -151,8 +153,8 @@ class PlayerState extends Equatable {
       hp: 100,
       maxHp: 100,
       attackSpeed: 1000,
-      moveSpeed: 1,
-      attackBoundaryRadius: 150,
+      moveSpeed: 5,
+      attackBoundaryRadius: 100,
       xp: 0,
       nextLevelXp: 100,
     ),
