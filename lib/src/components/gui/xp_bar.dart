@@ -47,7 +47,7 @@ class _XpBarState extends State<XpBar> {
             top: 0,
             left: 5,
             child: AppFont(
-              'Lv.${player.level} - ${player.xp}',
+              'Lv.${player.level}',
               color: Colors.black,
               fontWeight: FontWeight.bold,
               size: 12,

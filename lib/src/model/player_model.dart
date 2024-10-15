@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:vampire_survivors_game/src/model/inventory_model.dart';
 
 class PlayerModel extends Equatable {
   final double hp;
@@ -22,6 +23,34 @@ class PlayerModel extends Equatable {
     this.luckPercent = 0,
     this.level = 1,
   });
+
+  PlayerModel upgradeState(Inventory inventory) {
+    var moveSpeedItem = inventory.moveSpeedItem;
+    var attackSpeedItem = inventory.attackSpeedItem;
+    var powerItem = inventory.powerItem;
+    var luckItem = inventory.luckItem;
+    var evasionItem = inventory.evasionItem;
+    var maxHpItem = inventory.maxHpItem;
+    var attackAreaItem = inventory.attackAreaItem;
+
+    var moveSpeed =
+        this.moveSpeed + this.moveSpeed * moveSpeedItem.totalValue * 0.01;
+    var attackSpeed =
+        this.attackSpeed - this.attackSpeed * attackSpeedItem.totalValue * 0.01;
+    var maxHp = this.maxHp + this.maxHp * maxHpItem.totalValue * 0.01;
+    var luckPercent =
+        this.luckPercent + this.luckPercent * luckItem.totalValue.toInt();
+    var attackBoundaryRadius =
+        this.attackBoundaryRadius + attackAreaItem.totalValue;
+
+    return copyWith(
+      moveSpeed: moveSpeed,
+      attackSpeed: attackSpeed,
+      maxHp: maxHp,
+      luckPercent: luckPercent,
+      attackBoundaryRadius: attackBoundaryRadius,
+    );
+  }
 
   PlayerModel copyWith({
     double? hp,

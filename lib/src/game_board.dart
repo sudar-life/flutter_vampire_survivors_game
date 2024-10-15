@@ -133,7 +133,8 @@ class _GameBoardState extends State<GameBoard> {
   void _createEnemy() {
     var gameState = context.read<GameManager>().state;
     if (gameState.gameType != GameType.start &&
-        gameState.gameType != GameType.restart) {
+        gameState.gameType != GameType.restart &&
+        gameState.gameType != GameType.resume) {
       return;
     }
     var currentStage = gameState.stage;
@@ -228,6 +229,10 @@ class _GameBoardState extends State<GameBoard> {
                 .read<LevelUpItemManager>()
                 .makeRandomItems(state.playerModel.luckPercent);
             context.read<GameManager>().selectItemMode();
+            context.read<PlayerManager>().getItems([
+              const FieldItemModel(
+                  type: FieldItemType.XP, value: 0.001, x: 0, y: 0)
+            ]);
           }
         }),
         BlocListener<GameManager, GameState>(

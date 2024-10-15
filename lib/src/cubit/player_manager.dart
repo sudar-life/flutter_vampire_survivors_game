@@ -5,6 +5,8 @@ import 'package:equatable/equatable.dart';
 import 'package:vampire_survivors_game/src/enum/field_item_type.dart';
 import 'package:vampire_survivors_game/src/model/enemy_model.dart';
 import 'package:vampire_survivors_game/src/model/field_item_model.dart';
+import 'package:vampire_survivors_game/src/model/inventory_model.dart';
+import 'package:vampire_survivors_game/src/model/item_model.dart';
 import 'package:vampire_survivors_game/src/model/player_model.dart';
 import 'package:vampire_survivors_game/src/utils/data_util.dart';
 
@@ -129,6 +131,24 @@ class PlayerManager extends Cubit<PlayerState> {
       ));
     }
   }
+
+  upgradeItem(ItemModel item) {
+    var newInventory = state.inventory.addItem(item: item);
+    var newPlayerModel = const PlayerModel(
+      hp: 100,
+      maxHp: 100,
+      attackSpeed: 1000,
+      moveSpeed: 5,
+      attackBoundaryRadius: 100,
+      xp: 0,
+      nextLevelXp: 100,
+    );
+    newPlayerModel = newPlayerModel.upgradeState(newInventory);
+    emit(state.copyWith(
+      inventory: state.inventory.addItem(item: item),
+      playerModel: newPlayerModel,
+    ));
+  }
 }
 
 class PlayerState extends Equatable {
@@ -139,6 +159,7 @@ class PlayerState extends Equatable {
   final bool isHit;
   final bool isShotPossible;
   final PlayerModel playerModel;
+  final Inventory inventory;
   final DateTime? lastMissileShotTime;
   final Offset? targetEnemyPosition;
   final bool isDead;
@@ -149,6 +170,7 @@ class PlayerState extends Equatable {
     this.playerMoveX = 0.0,
     this.playerMoveY = 0.0,
     this.isDead = false,
+    this.inventory = const Inventory(),
     this.playerModel = const PlayerModel(
       hp: 100,
       maxHp: 100,
@@ -175,6 +197,7 @@ class PlayerState extends Equatable {
     bool? isShotPossible,
     DateTime? lastMissileShotTime,
     Offset? targetEnemyPosition,
+    Inventory? inventory,
   }) {
     return PlayerState(
       directionX: directionX ?? this.directionX,
@@ -187,6 +210,7 @@ class PlayerState extends Equatable {
       isShotPossible: isShotPossible ?? this.isShotPossible,
       lastMissileShotTime: lastMissileShotTime ?? this.lastMissileShotTime,
       targetEnemyPosition: targetEnemyPosition ?? this.targetEnemyPosition,
+      inventory: inventory ?? this.inventory,
     );
   }
 
@@ -202,5 +226,6 @@ class PlayerState extends Equatable {
         isShotPossible,
         lastMissileShotTime,
         targetEnemyPosition,
+        inventory,
       ];
 }
