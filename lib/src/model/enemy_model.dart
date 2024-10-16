@@ -5,6 +5,7 @@ import 'package:vampire_survivors_game/src/cubit/enemy_manager.dart';
 import 'package:vampire_survivors_game/src/enum/enemy_state_type.dart';
 
 class EnemyModel extends Equatable {
+  final String id;
   final double areaWidth;
   final double areaHeight;
   final double x;
@@ -24,6 +25,7 @@ class EnemyModel extends Equatable {
   final bool? useDropItemWithXp;
 
   const EnemyModel({
+    required this.id,
     this.areaWidth = 0.0,
     this.areaHeight = 0.0,
     this.x = 0.0,
@@ -49,6 +51,7 @@ class EnemyModel extends Equatable {
   double get damageYP => areaHeight / 2 - 15 + (damagedY ?? y);
 
   EnemyModel copyWith({
+    String? id,
     double? areaWidth,
     double? areaHeight,
     double? x,
@@ -68,6 +71,7 @@ class EnemyModel extends Equatable {
     bool? useDropItemWithXp,
   }) {
     return EnemyModel(
+      id: (id ?? this.id),
       areaWidth: areaWidth ?? this.areaWidth,
       areaHeight: areaHeight ?? this.areaHeight,
       x: (x ?? this.x),
@@ -90,6 +94,7 @@ class EnemyModel extends Equatable {
 
   @override
   List<Object?> get props => [
+        id,
         areaWidth,
         areaHeight,
         x,

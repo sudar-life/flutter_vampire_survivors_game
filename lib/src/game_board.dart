@@ -27,6 +27,7 @@ import 'package:vampire_survivors_game/src/enum/enemy_state_type.dart';
 import 'package:vampire_survivors_game/src/enum/field_item_type.dart';
 import 'package:vampire_survivors_game/src/enum/game_type.dart';
 import 'package:vampire_survivors_game/src/enum/gun_sector_type.dart';
+import 'package:vampire_survivors_game/src/model/damage_info_model.dart';
 import 'package:vampire_survivors_game/src/model/field_item_model.dart';
 
 class GameBoard extends StatefulWidget {
@@ -84,6 +85,7 @@ class _GameBoardState extends State<GameBoard> {
               playerState.targetEnemyPosition!.dx,
               playerState.targetEnemyPosition!.dy,
               GunSectorType.TOP,
+              playerState.playerModel.powerRate,
             );
         context.read<PlayerManager>().updatedShotMissileTime();
       }
@@ -105,7 +107,10 @@ class _GameBoardState extends State<GameBoard> {
     context.read<MissileManager>().checkColliding(enemies);
 
     //플레이어 충돌 감지
-    context.read<PlayerManager>().checkColliding(enemies);
+    context.read<PlayerManager>().checkColliding(
+        context.read<BackboardManager>().state.gameZoneWidth,
+        context.read<BackboardManager>().state.gameZoneHeight,
+        enemies);
 
     // field item 충돌 감지
     var playerX = context.read<PlayerManager>().state.playerMoveX;
@@ -200,7 +205,7 @@ class _GameBoardState extends State<GameBoard> {
               areaWidth: d.areaWidth,
               areaHeight: d.areaHeight,
               type: FieldItemType.XP,
-              value: d.xp * 100,
+              value: d.xp,
               x: d.x,
               y: d.y,
             );
@@ -209,6 +214,18 @@ class _GameBoardState extends State<GameBoard> {
           }).toList();
         }),
         BlocListener<EnemyManager, EnemyState>(
+          listenWhen: (previous, current) =>
+              previous.damagedPoints.length != current.damagedPoints.length,
+          listener: (context, state) {
+            state.damagedPoints.where((d) {
+              if (!d.isExpired()) {
+                context.read<DamageEffectManager>().addDamage(d);
+              }
+              return false;
+            }).toList();
+          },
+        ),
+        BlocListener<PlayerManager, PlayerState>(
           listenWhen: (previous, current) =>
               previous.damagedPoints.length != current.damagedPoints.length,
           listener: (context, state) {
@@ -348,6 +365,10 @@ class _GameBoardState extends State<GameBoard> {
                                 x: damage.x,
                                 y: damage.y,
                                 damage: damage.damage,
+                                isMiss: damage.isMiss,
+                                color: damage.targetType == TargetType.PLAYER
+                                    ? Colors.red
+                                    : Colors.black,
                               ))
                           .toList(),
                     );

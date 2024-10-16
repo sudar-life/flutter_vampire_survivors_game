@@ -1,8 +1,10 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:vampire_survivors_game/src/enum/field_item_type.dart';
+import 'package:vampire_survivors_game/src/model/damage_info_model.dart';
 import 'package:vampire_survivors_game/src/model/enemy_model.dart';
 import 'package:vampire_survivors_game/src/model/field_item_model.dart';
 import 'package:vampire_survivors_game/src/model/inventory_model.dart';
@@ -50,10 +52,15 @@ class PlayerManager extends Cubit<PlayerState> {
     }
   }
 
-  checkColliding(List<EnemyModel> enemies) {
+  checkColliding(double backgroundWidth, double backgroundHeight,
+      List<EnemyModel> enemies) {
+    var damagedPoints = <DamageInfoModel>{};
     var playerX = state.playerMoveX;
     var playerY = state.playerMoveY;
     var enemyPower = 0.0;
+    Offset? hitPoint;
+    String? id;
+    bool isMiss = false;
     var isHit = enemies.any((enemy) {
       var centerA = Offset(playerX + 20, playerY + 20);
       var centerB = Offset(enemy.x + 15, enemy.y + 15);
@@ -62,7 +69,11 @@ class PlayerManager extends Cubit<PlayerState> {
       var isHit =
           GameDataUtil.isCircleColliding(centerA, radiusA, centerB, radiusB);
       if (isHit) {
-        enemyPower = enemy.power * 2;
+        enemyPower = enemy.power;
+        hitPoint =
+            Offset(backgroundWidth + playerX, backgroundHeight + playerY - 40);
+        id = enemy.id;
+        isMiss = state.playerModel.evasionRate > Random().nextInt(100);
       }
       return isHit;
     });
@@ -79,16 +90,34 @@ class PlayerManager extends Cubit<PlayerState> {
       }
       return isPossibleShot;
     });
-    var currentHp = state.playerModel.hp - enemyPower;
-    if (currentHp < 0) {
-      currentHp = 0;
+    var currentHp = state.playerModel.hp;
+    if (isHit && hitPoint != null) {
+      if (state.damagedPoints.where((element) => element.id == id).isEmpty) {
+        damagedPoints.add(DamageInfoModel(
+          id: id!,
+          x: hitPoint!.dx,
+          y: hitPoint!.dy,
+          createdAt: DateTime.now(),
+          targetType: TargetType.PLAYER,
+          damage: enemyPower,
+          isMiss: isMiss,
+        ));
+        if (!isMiss) {
+          currentHp -= enemyPower;
+          if (currentHp < 0) {
+            currentHp = 0;
+          }
+        }
+      }
     }
+
     emit(state.copyWith(
       isHit: isHit,
       playerModel: state.playerModel.copyWith(hp: currentHp),
       isDead: currentHp == 0,
       isShotPossible: isShotPossible,
       targetEnemyPosition: targetEnemyPosition,
+      damagedPoints: {...state.damagedPoints, ...damagedPoints},
     ));
   }
 
@@ -163,6 +192,7 @@ class PlayerState extends Equatable {
   final DateTime? lastMissileShotTime;
   final Offset? targetEnemyPosition;
   final bool isDead;
+  final Set<DamageInfoModel> damagedPoints;
 
   const PlayerState({
     this.directionX = 0.0,
@@ -171,6 +201,7 @@ class PlayerState extends Equatable {
     this.playerMoveY = 0.0,
     this.isDead = false,
     this.inventory = const Inventory(),
+    this.damagedPoints = const {},
     this.playerModel = const PlayerModel(
       hp: 100,
       maxHp: 100,
@@ -196,6 +227,7 @@ class PlayerState extends Equatable {
     bool? isDead,
     bool? isShotPossible,
     DateTime? lastMissileShotTime,
+    Set<DamageInfoModel>? damagedPoints,
     Offset? targetEnemyPosition,
     Inventory? inventory,
   }) {
@@ -211,6 +243,7 @@ class PlayerState extends Equatable {
       lastMissileShotTime: lastMissileShotTime ?? this.lastMissileShotTime,
       targetEnemyPosition: targetEnemyPosition ?? this.targetEnemyPosition,
       inventory: inventory ?? this.inventory,
+      damagedPoints: damagedPoints ?? this.damagedPoints,
     );
   }
 
@@ -227,5 +260,6 @@ class PlayerState extends Equatable {
         lastMissileShotTime,
         targetEnemyPosition,
         inventory,
+        damagedPoints,
       ];
 }

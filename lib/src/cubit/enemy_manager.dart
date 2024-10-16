@@ -50,6 +50,7 @@ class EnemyManager extends Cubit<EnemyState> {
     var nx = Random().nextBool();
     var ny = Random().nextBool();
     var enemy = EnemyModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
       areaWidth: backgroundWidth,
       areaHeight: backgroundHeight,
       x: x * (nx ? 1 : -1),

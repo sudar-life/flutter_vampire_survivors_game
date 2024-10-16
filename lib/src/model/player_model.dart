@@ -9,6 +9,8 @@ class PlayerModel extends Equatable {
   final double moveSpeed;
   final double xp;
   final double nextLevelXp;
+  final double powerRate;
+  final double evasionRate;
   final int luckPercent;
   final int level;
 
@@ -21,6 +23,8 @@ class PlayerModel extends Equatable {
     required this.xp,
     required this.nextLevelXp,
     this.luckPercent = 0,
+    this.powerRate = 0,
+    this.evasionRate = 1,
     this.level = 1,
   });
 
@@ -42,6 +46,8 @@ class PlayerModel extends Equatable {
         this.luckPercent + this.luckPercent * luckItem.totalValue.toInt();
     var attackBoundaryRadius =
         this.attackBoundaryRadius + attackAreaItem.totalValue;
+    var powerRate = this.powerRate + powerItem.totalValue;
+    var evasionRate = this.evasionRate + evasionItem.totalValue;
 
     return copyWith(
       moveSpeed: moveSpeed,
@@ -49,6 +55,8 @@ class PlayerModel extends Equatable {
       maxHp: maxHp,
       luckPercent: luckPercent,
       attackBoundaryRadius: attackBoundaryRadius,
+      powerRate: powerRate,
+      evasionRate: evasionRate,
     );
   }
 
@@ -60,6 +68,8 @@ class PlayerModel extends Equatable {
     double? attackBoundaryRadius,
     double? xp,
     double? nextLevelXp,
+    double? powerRate,
+    double? evasionRate,
     int? luckPercent,
     int? level,
   }) {
@@ -73,6 +83,8 @@ class PlayerModel extends Equatable {
       nextLevelXp: nextLevelXp ?? this.nextLevelXp,
       level: level ?? this.level,
       luckPercent: luckPercent ?? this.luckPercent,
+      powerRate: powerRate ?? this.powerRate,
+      evasionRate: evasionRate ?? this.evasionRate,
     );
   }
 
@@ -87,5 +99,7 @@ class PlayerModel extends Equatable {
         nextLevelXp,
         level,
         luckPercent,
+        powerRate,
+        evasionRate,
       ];
 }

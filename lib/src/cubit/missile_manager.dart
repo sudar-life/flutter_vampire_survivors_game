@@ -25,6 +25,7 @@ class MissileManager extends Cubit<MissileState> {
     double tx,
     double ty,
     GunSectorType gunSectorType,
+    double powerRate,
   ) {
     this.width = width;
     this.height = height;
@@ -37,7 +38,7 @@ class MissileManager extends Cubit<MissileState> {
       y: y,
       angle: atan2(((ty + 15) - y), ((tx + 15) - x)),
       speed: speed,
-      power: 10,
+      power: 10 + (10 * powerRate * 0.01),
     );
     emit(state.copyWith(missiles: [...state.missiles, missile]));
   }
