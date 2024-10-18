@@ -5,6 +5,7 @@ import 'package:vampire_survivors_game/src/components/gui/item_select_ui.dart';
 import 'package:vampire_survivors_game/src/components/gui/xp_bar.dart';
 import 'package:vampire_survivors_game/src/components/timer.dart';
 import 'package:vampire_survivors_game/src/cubit/game_manager.dart';
+import 'package:vampire_survivors_game/src/cubit/levelup_item_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/player_manager.dart';
 import 'package:vampire_survivors_game/src/cubit/timer_manager.dart';
 import 'package:vampire_survivors_game/src/enum/game_type.dart';

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:vampire_survivors_game/src/enum/gun_type.dart';
 
 class MissileModel extends Equatable {
   final String id;
@@ -7,6 +8,7 @@ class MissileModel extends Equatable {
   final double angle;
   final double speed;
   final double power;
+  final GunType? gunType;
 
   MissileModel({
     required this.id,
@@ -15,6 +17,7 @@ class MissileModel extends Equatable {
     this.angle = 0.0,
     this.speed = 3,
     this.power = 1,
+    this.gunType,
   });
 
   MissileModel copyWith({
@@ -24,6 +27,7 @@ class MissileModel extends Equatable {
     double? angle,
     double? speed,
     double? power,
+    GunType? gunType,
   }) {
     return MissileModel(
       id: (id ?? this.id),
@@ -32,6 +36,7 @@ class MissileModel extends Equatable {
       angle: (angle ?? this.angle),
       speed: speed ?? this.speed,
       power: power ?? this.power,
+      gunType: gunType ?? this.gunType,
     );
   }
 
@@ -42,5 +47,6 @@ class MissileModel extends Equatable {
         angle,
         speed,
         power,
+        gunType,
       ];
 }

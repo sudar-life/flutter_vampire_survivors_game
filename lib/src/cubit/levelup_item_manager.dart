@@ -42,25 +42,48 @@ class LevelUpItemManager extends Cubit<LevelUpItemState> {
           itmeName: mainItem.itemNames[Random().nextInt(3)]));
     }
     items.shuffle();
-    emit(state.copyWith(items: items));
+    bool critical = checkCriticalItemCheck();
+    int? indexCard = critical ? Random().nextInt(3) : null;
+    emit(state.copyWith(
+        items: items, criticalItem: critical, indexCard: indexCard));
+  }
+
+  bool checkCriticalItemCheck() {
+    return 10 > Random().nextInt(100);
+  }
+
+  void clearCriticalItem() {
+    emit(state.copyWith(criticalItem: false, indexCard: -1));
   }
 }
 
 class LevelUpItemState extends Equatable {
   final List<ItemModel> items;
+  final bool criticalItem;
+  final int? indexCard;
 
-  const LevelUpItemState({this.items = const []});
+  const LevelUpItemState({
+    this.items = const [],
+    this.criticalItem = false,
+    this.indexCard,
+  });
 
   LevelUpItemState copyWith({
     List<ItemModel>? items,
+    bool? criticalItem,
+    int? indexCard,
   }) {
     return LevelUpItemState(
       items: items ?? this.items,
+      criticalItem: criticalItem ?? this.criticalItem,
+      indexCard: indexCard ?? this.indexCard,
     );
   }
 
   @override
   List<Object?> get props => [
         items,
+        criticalItem,
+        indexCard,
       ];
 }

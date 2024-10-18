@@ -4,9 +4,12 @@ import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:vampire_survivors_game/src/enum/field_item_type.dart';
+import 'package:vampire_survivors_game/src/enum/gun_sector_type.dart';
+import 'package:vampire_survivors_game/src/enum/gun_type.dart';
 import 'package:vampire_survivors_game/src/model/damage_info_model.dart';
 import 'package:vampire_survivors_game/src/model/enemy_model.dart';
 import 'package:vampire_survivors_game/src/model/field_item_model.dart';
+import 'package:vampire_survivors_game/src/model/gun_item_model.dart';
 import 'package:vampire_survivors_game/src/model/inventory_model.dart';
 import 'package:vampire_survivors_game/src/model/item_model.dart';
 import 'package:vampire_survivors_game/src/model/player_model.dart';
@@ -121,8 +124,10 @@ class PlayerManager extends Cubit<PlayerState> {
     ));
   }
 
-  updatedShotMissileTime() {
-    emit(state.copyWith(lastMissileShotTime: DateTime.now()));
+  updatedShotMissileTime(GunItem gunItem) {
+    var newGunItem = gunItem.copyWith(lastMissileShotTime: DateTime.now());
+    state.gunItems![newGunItem.gunSectorType] = newGunItem;
+    emit(state.copyWith(gunItems: state.gunItems));
   }
 
   getItems(List<FieldItemModel> items) {
@@ -139,6 +144,17 @@ class PlayerManager extends Cubit<PlayerState> {
           ));
           break;
       }
+    }
+  }
+
+  getTheGun(GunItem gunItem) {
+    var gunSelector = gunItem.gunSectorType;
+    var newGunItems = state.gunItems ?? {};
+    if (newGunItems[gunSelector] == null) {
+      emit(state.copyWith(gunItems: {
+        ...newGunItems,
+        gunSelector: gunItem,
+      }));
     }
   }
 
@@ -189,7 +205,7 @@ class PlayerState extends Equatable {
   final bool isShotPossible;
   final PlayerModel playerModel;
   final Inventory inventory;
-  final DateTime? lastMissileShotTime;
+  final Map<GunSectorType, GunItem?>? gunItems;
   final Offset? targetEnemyPosition;
   final bool isDead;
   final Set<DamageInfoModel> damagedPoints;
@@ -214,7 +230,7 @@ class PlayerState extends Equatable {
     this.isHit = false,
     this.isShotPossible = false,
     this.targetEnemyPosition,
-    this.lastMissileShotTime,
+    this.gunItems,
   });
 
   PlayerState copyWith({
@@ -226,7 +242,7 @@ class PlayerState extends Equatable {
     bool? isHit,
     bool? isDead,
     bool? isShotPossible,
-    DateTime? lastMissileShotTime,
+    Map<GunSectorType, GunItem?>? gunItems,
     Set<DamageInfoModel>? damagedPoints,
     Offset? targetEnemyPosition,
     Inventory? inventory,
@@ -240,7 +256,7 @@ class PlayerState extends Equatable {
       isHit: isHit ?? this.isHit,
       isDead: isDead ?? this.isDead,
       isShotPossible: isShotPossible ?? this.isShotPossible,
-      lastMissileShotTime: lastMissileShotTime ?? this.lastMissileShotTime,
+      gunItems: gunItems ?? this.gunItems,
       targetEnemyPosition: targetEnemyPosition ?? this.targetEnemyPosition,
       inventory: inventory ?? this.inventory,
       damagedPoints: damagedPoints ?? this.damagedPoints,
@@ -257,7 +273,7 @@ class PlayerState extends Equatable {
         isHit,
         isDead,
         isShotPossible,
-        lastMissileShotTime,
+        gunItems,
         targetEnemyPosition,
         inventory,
         damagedPoints,

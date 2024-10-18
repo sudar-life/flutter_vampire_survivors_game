@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:vampire_survivors_game/src/enum/gun_type.dart';
 
 class Missile extends StatelessWidget {
   final double x;
   final double y;
-  const Missile({super.key, required this.x, required this.y});
+  final GunType gunType;
+  const Missile(
+      {super.key, required this.x, required this.y, required this.gunType});
 
   @override
   Widget build(BuildContext context) {
@@ -11,11 +14,11 @@ class Missile extends StatelessWidget {
       left: x,
       top: y,
       child: Container(
-        width: 7,
-        height: 7,
-        decoration: const BoxDecoration(
+        width: gunType.missileSize,
+        height: gunType.missileSize,
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.black,
+          color: gunType.missileColor,
         ),
       ),
     );

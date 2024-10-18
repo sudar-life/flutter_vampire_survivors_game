@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vampire_survivors_game/src/enum/gun_sector_type.dart';
+import 'package:vampire_survivors_game/src/enum/gun_type.dart';
 import 'package:vampire_survivors_game/src/model/enemy_model.dart';
 import 'package:vampire_survivors_game/src/model/missile_model.dart';
 import 'package:vampire_survivors_game/src/utils/data_util.dart';
@@ -25,6 +26,7 @@ class MissileManager extends Cubit<MissileState> {
     double tx,
     double ty,
     GunSectorType gunSectorType,
+    GunType gunType,
     double powerRate,
   ) {
     this.width = width;
@@ -32,13 +34,15 @@ class MissileManager extends Cubit<MissileState> {
     var x = width / 2 - 15 + sx + gunSectorType.adjustPoint.dx;
     var y = height / 2 - 15 + sy + gunSectorType.adjustPoint.dy;
     var speed = 15.0;
+    var missilePower = (10 * gunType.fireRate);
     var missile = MissileModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       x: x,
       y: y,
       angle: atan2(((ty + 15) - y), ((tx + 15) - x)),
       speed: speed,
-      power: 10 + (10 * powerRate * 0.01),
+      power: missilePower + (missilePower * powerRate * 0.01),
+      gunType: gunType,
     );
     emit(state.copyWith(missiles: [...state.missiles, missile]));
   }

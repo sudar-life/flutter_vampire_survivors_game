@@ -6,8 +6,7 @@ enum ItemType {
   evasionItem([2.0, 3.0, 5.0], ['연막탄 발사기', '회피 장갑', '전술 회피 모듈'], '회피율', '%'),
   maxHpItem([10.0, 20.0, 30.0], ['강화 방탄복', '군용 헬멧', '보호 방패'], '최대 HP', '%'),
   attackAreaItem(
-      [10.0, 20.0, 40.0], ['확산 탄약', '산탄총 개조 키트', '폭발 파편 탄환'], '공격범위', ''),
-  ;
+      [10.0, 20.0, 40.0], ['확산 탄약', '산탄총 개조 키트', '폭발 파편 탄환'], '공격범위', '');
 
   const ItemType(this.val, this.itemNames, this.stateLabel, this.unit);
   final List<double> val;

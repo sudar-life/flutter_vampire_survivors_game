@@ -27,8 +27,10 @@ import 'package:vampire_survivors_game/src/enum/enemy_state_type.dart';
 import 'package:vampire_survivors_game/src/enum/field_item_type.dart';
 import 'package:vampire_survivors_game/src/enum/game_type.dart';
 import 'package:vampire_survivors_game/src/enum/gun_sector_type.dart';
+import 'package:vampire_survivors_game/src/enum/gun_type.dart';
 import 'package:vampire_survivors_game/src/model/damage_info_model.dart';
 import 'package:vampire_survivors_game/src/model/field_item_model.dart';
+import 'package:vampire_survivors_game/src/model/gun_item_model.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({super.key});
@@ -51,6 +53,13 @@ class _GameBoardState extends State<GameBoard> {
         _updateGame();
       }
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PlayerManager>().getTheGun(GunItem(
+          gunType: GunType.Pistal,
+          gunSectorType: GunSectorType.LEFT,
+          lastMissileShotTime: DateTime.now()));
+    });
   }
 
   void _updateGame() {
@@ -72,23 +81,27 @@ class _GameBoardState extends State<GameBoard> {
   void _shotMissile() {
     var playerState = context.read<PlayerManager>().state;
     if (playerState.isShotPossible) {
-      var lastShotMissileTime = playerState.lastMissileShotTime;
-      if ((lastShotMissileTime == null ||
-              DateTime.now().difference(lastShotMissileTime).inMilliseconds >
-                  playerState.playerModel.attackSpeed) &&
-          playerState.targetEnemyPosition != null) {
-        context.read<MissileManager>().shotMissile(
-              context.read<BackboardManager>().state.gameZoneWidth * 2,
-              context.read<BackboardManager>().state.gameZoneHeight * 2,
-              playerState.playerMoveX,
-              playerState.playerMoveY,
-              playerState.targetEnemyPosition!.dx,
-              playerState.targetEnemyPosition!.dy,
-              GunSectorType.TOP,
-              playerState.playerModel.powerRate,
-            );
-        context.read<PlayerManager>().updatedShotMissileTime();
-      }
+      var gunItems = playerState.gunItems;
+      gunItems!.forEach((key, value) {
+        if (value != null &&
+            DateTime.now()
+                    .difference(value.lastMissileShotTime!)
+                    .inMilliseconds >
+                playerState.playerModel.attackSpeed * value.gunType.fireRate) {
+          context.read<MissileManager>().shotMissile(
+                context.read<BackboardManager>().state.gameZoneWidth * 2,
+                context.read<BackboardManager>().state.gameZoneHeight * 2,
+                playerState.playerMoveX,
+                playerState.playerMoveY,
+                playerState.targetEnemyPosition!.dx,
+                playerState.targetEnemyPosition!.dy,
+                value.gunSectorType,
+                value.gunType,
+                playerState.playerModel.powerRate,
+              );
+          context.read<PlayerManager>().updatedShotMissileTime(value);
+        }
+      });
     }
   }
 
@@ -328,6 +341,7 @@ class _GameBoardState extends State<GameBoard> {
                           .map((missile) => Missile(
                                 x: missile!.x,
                                 y: missile.y,
+                                gunType: missile.gunType!,
                               ))
                           .toList(),
                     );
