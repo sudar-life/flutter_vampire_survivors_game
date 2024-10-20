@@ -3,9 +3,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 enum ItemGradeType {
-  normal(33, Colors.grey, '일반'),
-  magic(33, Colors.blue, '희귀'),
-  rare(33, Colors.orange, '레어');
+  normal(60, Colors.grey, '일반'),
+  magic(30, Colors.blue, '희귀'),
+  rare(10, Colors.orange, '레어');
 
   const ItemGradeType(this.dropPercent, this.color, this.name);
   final double dropPercent;

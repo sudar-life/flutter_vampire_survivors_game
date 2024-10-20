@@ -30,7 +30,8 @@ class FieldItemManager extends Cubit<FieldItemState> {
 
   void checkColliding(double px, double py, double radius) {
     Set<FieldItemModel> getItems = {};
-    state.fieldItems.removeWhere((fieldItem) {
+    var fieldItems = {...state.fieldItems};
+    fieldItems.removeWhere((fieldItem) {
       var x = fieldItem.x;
       var y = fieldItem.y;
       var centerA = Offset(x, y);
@@ -49,7 +50,7 @@ class FieldItemManager extends Cubit<FieldItemState> {
       return isHit;
     });
     emit(state.copyWith(
-      fieldItems: {...state.fieldItems},
+      fieldItems: {...fieldItems},
       getItems: {...state.getItems, ...getItems},
     ));
   }

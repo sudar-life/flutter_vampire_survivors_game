@@ -4,7 +4,7 @@ enum StageType {
   stage1(
     30,
     2,
-    2,
+    4,
     [
       EnemyType.noraml1,
       EnemyType.normal2,
@@ -35,6 +35,12 @@ enum StageType {
     EnemyType.normal3,
     EnemyType.middleBoss1,
     EnemyType.middleBoss2,
+  ]),
+  stage5(120, 5, 1.5, [
+    EnemyType.normal3,
+    EnemyType.middleBoss1,
+    EnemyType.middleBoss2,
+    EnemyType.boss1
   ]),
   ;
 

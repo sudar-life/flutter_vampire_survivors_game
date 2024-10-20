@@ -110,7 +110,7 @@ class _GameBoardState extends State<GameBoard> {
     context
         .read<EnemyManager>()
         .checkDamage(context.read<MissileManager>().state.missiles);
-    //적군 미사일 충돌감지
+    // //적군 미사일 충돌감지
     var enemies = context
         .read<EnemyManager>()
         .state
@@ -119,13 +119,13 @@ class _GameBoardState extends State<GameBoard> {
         .toList();
     context.read<MissileManager>().checkColliding(enemies);
 
-    //플레이어 충돌 감지
+    // //플레이어 충돌 감지
     context.read<PlayerManager>().checkColliding(
         context.read<BackboardManager>().state.gameZoneWidth,
         context.read<BackboardManager>().state.gameZoneHeight,
         enemies);
 
-    // field item 충돌 감지
+    // // field item 충돌 감지
     var playerX = context.read<PlayerManager>().state.playerMoveX;
     var playerY = context.read<PlayerManager>().state.playerMoveY;
     context.read<FieldItemManager>().checkColliding(playerX, playerY, 10);
@@ -206,7 +206,8 @@ class _GameBoardState extends State<GameBoard> {
           listenWhen: (previous, current) =>
               previous.getItems.length != current.getItems.length,
           listener: (context, state) {
-            context.read<PlayerManager>().getItems(state.getItems.toList());
+            context.read<PlayerManager>().getItems(state.getItems.toList(),
+                context.read<GameManager>().state.stage);
             context.read<FieldItemManager>().clearGetItems();
           },
         ),
@@ -261,8 +262,8 @@ class _GameBoardState extends State<GameBoard> {
             context.read<GameManager>().selectItemMode();
             context.read<PlayerManager>().getItems([
               const FieldItemModel(
-                  type: FieldItemType.XP, value: 0.001, x: 0, y: 0)
-            ]);
+                  type: FieldItemType.XP, value: 0.001, x: 0, y: 0),
+            ], context.read<GameManager>().state.stage);
           }
         }),
         BlocListener<GameManager, GameState>(

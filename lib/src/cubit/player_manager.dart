@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:vampire_survivors_game/src/enum/field_item_type.dart';
 import 'package:vampire_survivors_game/src/enum/gun_sector_type.dart';
 import 'package:vampire_survivors_game/src/enum/gun_type.dart';
+import 'package:vampire_survivors_game/src/enum/stage_type.dart';
 import 'package:vampire_survivors_game/src/model/damage_info_model.dart';
 import 'package:vampire_survivors_game/src/model/enemy_model.dart';
 import 'package:vampire_survivors_game/src/model/field_item_model.dart';
@@ -130,12 +131,12 @@ class PlayerManager extends Cubit<PlayerState> {
     emit(state.copyWith(gunItems: state.gunItems));
   }
 
-  getItems(List<FieldItemModel> items) {
+  getItems(List<FieldItemModel> items, StageType stageType) {
     for (int i = 0; i < items.length; i++) {
       var item = items[i];
       switch (item.type) {
         case FieldItemType.XP:
-          updateXp(item);
+          updateXp(item.value / ((stageType.index + 1) * 1.5));
           break;
         case FieldItemType.HEAL:
           emit(state.copyWith(
@@ -158,11 +159,11 @@ class PlayerManager extends Cubit<PlayerState> {
     }
   }
 
-  updateXp(FieldItemModel item) {
-    if (state.playerModel.xp + item.value <= state.playerModel.nextLevelXp) {
+  updateXp(double xp) {
+    if (state.playerModel.xp + xp <= state.playerModel.nextLevelXp) {
       emit(state.copyWith(
         playerModel: state.playerModel.copyWith(
-          xp: state.playerModel.xp + item.value,
+          xp: state.playerModel.xp + xp,
         ),
       ));
     } else {

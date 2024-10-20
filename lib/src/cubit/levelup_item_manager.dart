@@ -49,7 +49,7 @@ class LevelUpItemManager extends Cubit<LevelUpItemState> {
   }
 
   bool checkCriticalItemCheck() {
-    return 10 > Random().nextInt(100);
+    return 15 > Random().nextInt(100);
   }
 
   void clearCriticalItem() {

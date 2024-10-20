@@ -13,6 +13,8 @@ class ItemSelectUi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var state = context.watch<LevelUpItemManager>().state;
+    var playerGunSlotCounts =
+        context.read<PlayerManager>().state.gunItems?.length ?? 1;
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -37,15 +39,16 @@ class ItemSelectUi extends StatelessWidget {
                 state.items.length,
                 (index) => ItemSingleUi(
                   item: state.items[index],
-                  isCriticalItem:
-                      state.indexCard != null && state.indexCard == index,
+                  isCriticalItem: state.indexCard != null &&
+                      state.indexCard == index &&
+                      playerGunSlotCounts < 4,
                 ),
               ),
             ),
             SizedBox(height: 50),
           ],
         ),
-        if (state.criticalItem)
+        if (state.criticalItem && playerGunSlotCounts < 4)
           const Positioned(
             left: 0,
             right: 0,
